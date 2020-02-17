@@ -449,7 +449,6 @@ namespace PrintWizard
             // Add circuit diagram blocks
             foreach (string _blockName in list)
             {
-
                 if (blockTable.Has(_blockName))
                 {
                     //Also open modelspace - we'll be adding our BlockReference to it
