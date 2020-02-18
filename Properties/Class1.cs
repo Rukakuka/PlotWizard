@@ -21,6 +21,8 @@ using System.IO;
 using System.Windows.Media.Imaging;
 using WApplication = System.Windows.Forms;
 using System.Collections.Specialized;
+using System.Threading;
+using System.Diagnostics;
 
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Ap = Autodesk.AutoCAD.ApplicationServices;
@@ -88,7 +90,7 @@ namespace PrintWizard
         }
 
         private const string MyBlock_Name = "ListSPDSF6_A42"; // standart GOST A4
-        private const string MyBlockAttr_Label = "МЧЕРТНИЗ";
+        private const string MyBlockAttr_Label = "ЧЕРТНИЗ";
         private const string MyBLockAttr_Sheet = "ЛИСТ";
 
         [Rt.CommandMethod("PlotWizard", Rt.CommandFlags.Modal)]
@@ -103,7 +105,7 @@ namespace PrintWizard
 
             using (doc.LockDocument())
             {
-                
+                /*============= PLOT BY REGION ==============*/
                 /*
                 Ed.PromptEntityOptions peo = new Ed.PromptEntityOptions(
                  "\nSelect a region"
@@ -123,6 +125,7 @@ namespace PrintWizard
 
                 Db.ObjectId regionId = per.ObjectId;
                 */
+                /*============= USER FILE NAME INPUT DIALOG ==============*/
                 /*
                 Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32
                   .SaveFileDialog();
@@ -140,12 +143,17 @@ namespace PrintWizard
                 String pdfFileName = saveFileDialog.FileName;
                 */
 
+                String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\"; ;
                 List<plotObject> plotinfo = LoadBlocks();
+
                 foreach (var plot in plotinfo)
                 {
-                    String pdfFileName = plot.label + " Лист " + plot.sheet;
-                    PlotBlocks(plotinfo, "DWG To PDF.pc3",
-                      "ISO_expand_A4_(297.00_x_210.00_MM)", pdfFileName);
+                    String pdfFileName = MySavePath + plot.label + " Лист " + plot.sheet;
+
+                    PlotBlocks(plotinfo,
+                        "DWG To PDF.pc3",
+                      "ISO_full_bleed_A4_(297.00_x_210.00_MM)",
+                      pdfFileName);
                     ed.WriteMessage("\nThe \"{0}\" file created.\n", pdfFileName);
                 }
                 /*
@@ -190,8 +198,8 @@ namespace PrintWizard
                     {
                         var attribute = tr.GetObject(attributeId, OpenMode.ForRead) as AttributeReference;
                         if (attribute == null) continue;
-
-                        if (attribute.Tag.Equals(MyBlockAttr_Label, StringComparison.CurrentCultureIgnoreCase))
+                        
+                        if (attribute.Tag.Contains(MyBlockAttr_Label))
                             pinfo.label = attribute.TextString;
                         if (attribute.Tag.Equals(MyBLockAttr_Sheet, StringComparison.CurrentCultureIgnoreCase))
                             pinfo.sheet = attribute.TextString;
@@ -326,11 +334,24 @@ namespace PrintWizard
 
                                 // A PlotEngine does the actual plotting
                                 // (can also create one for Preview)
-                                if (Pt.PlotFactory.ProcessPlotState == Pt.ProcessPlotState
-                                  .NotPlotting)
+                                //Stopwatch stopWatch = new Stopwatch();
+                                //stopWatch.Start();
+                                //while (Pt.PlotFactory.ProcessPlotState != Pt.ProcessPlotState.NotPlotting)
+                                //{
+                                //    if (stopWatch.ElapsedMilliseconds > 5000)
+                                //    {
+                                //        stopWatch.Restart();
+                                //        ed.WriteMessage("\nAnother plot is in progress. Waiting to complete . . .");
+                                //    }
+                                //}
+
+                                if (Pt.PlotFactory.ProcessPlotState != Pt.ProcessPlotState.NotPlotting)
                                 {
-                                    using (Pt.PlotEngine pe = Pt.PlotFactory.CreatePublishEngine()
-                                      )
+                                    ed.WriteMessage("\nAnother plot is in progress. Skip");
+                                }
+                                else
+                                {
+                                    using (Pt.PlotEngine pe = Pt.PlotFactory.CreatePublishEngine())
                                     {
                                         // Create a Progress Dialog to provide info
                                         // and allow thej user to cancel
@@ -395,10 +416,6 @@ namespace PrintWizard
                                         }
                                     }
                                 }
-                                else
-                                {
-                                    ed.WriteMessage("\nAnother plot is in progress.");
-                                }
                             }
                         }
                         tr.Commit();
@@ -410,6 +427,7 @@ namespace PrintWizard
                 Hs.WorkingDatabase = previewDb;
             }
         }
+
         // This method helps to get correct "boundary box" for the regions which 
         // created through the splines. Written by Alexander Rivilis.
         public static void GetVisualBoundary(this Db.Region region, double delta,
