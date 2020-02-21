@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
 
@@ -52,7 +53,7 @@ namespace PrintWizard
         )
         {
             // First try to get the layout
-            var objId = lm.GetLayoutId(name);
+            var layId = lm.GetLayoutId(name);
 
             List<String> forbiddenSymbols = new List<String> {"\\", "<" , ">", "/", ",", "`",
                                                               "?", ":", ";", "*", "|", "="};
@@ -62,17 +63,17 @@ namespace PrintWizard
             }
 
             // If it doesn't exist, we create it
-            if (!objId.IsValid)
+            if (!layId.IsValid)
             {
                 try
                 {
-                    objId = lm.CreateLayout(name);
+                    layId = lm.CreateLayout(name);
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception e)
                 {
                     Document doc = Application.DocumentManager.MdiActiveDocument;
                     Editor ed = doc.Editor;
-                    ed.WriteMessage("Exception caught : \n" + e.ToString());
+                    ed.WriteMessage("\nException caught : \n" + e.ToString());
                 }
             }
             // And finally we select it
@@ -80,7 +81,7 @@ namespace PrintWizard
             {
                 lm.CurrentLayout = name;
             }
-            return objId;
+            return layId;
         }
         /// <summary>
         /// Applies an action to the specified viewport from this layout.
@@ -240,6 +241,53 @@ namespace PrintWizard
             // vp.ViewHeight *= 1.1, for instance)
             vp.CustomScale *= fac;
         }
-    }
+        public static List<string> GetPlotterNameList()
+        {
+            List<string> pl = new List<string>();
+            using (PlotSettings plSet = new PlotSettings(true))
+            {
+                PlotSettingsValidator acPlSetVdr = PlotSettingsValidator.Current;
 
+                int cnt = 0;
+                // Set the Plotter and page size
+                acPlSetVdr.SetPlotConfigurationName(plSet, "DWF6 ePlot.pc3",
+                                                    "ANSI_A_(8.50_x_11.00_Inches)");
+
+                foreach (string plotterName in acPlSetVdr.GetPlotDeviceList())
+                {
+                    //acDoc.Editor.WriteMessage("\n  " + plotterName);
+                    pl.Add(plotterName);
+                }
+            }
+            return pl;
+        }
+        public static Dictionary<string,string> GetMediaNameList()
+        {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            Dictionary<string, string> ml = new Dictionary<string, string>();
+            using (PlotSettings plSet = new PlotSettings(true))
+            {
+                PlotSettingsValidator acPlSetVdr = PlotSettingsValidator.Current;
+
+                int cnt = 0;
+                // Set the Plotter and page size
+                acPlSetVdr.SetPlotConfigurationName(plSet, "DWF6 ePlot.pc3",
+                                                    "ANSI_A_(8.50_x_11.00_Inches)");
+
+                foreach (string mediaName in acPlSetVdr.GetCanonicalMediaNameList(plSet))
+                {
+                    acDoc.Editor.WriteMessage("\n  " + mediaName + " | " +
+                                              acPlSetVdr.GetLocaleMediaName(plSet, cnt));
+                    try
+                    {
+                        ml.Add(mediaName, acPlSetVdr.GetLocaleMediaName(plSet, cnt));
+                    }
+                    catch
+                    {; }
+                    cnt = cnt + 1;
+                }
+            }
+            return ml;
+        }
+    }
 }

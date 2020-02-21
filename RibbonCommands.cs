@@ -39,7 +39,7 @@ using Br = Autodesk.AutoCAD.BoundaryRepresentation;
 using Pt = Autodesk.AutoCAD.PlottingServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.PlottingServices;
-
+using System.Collections.Specialized;
 
 namespace PrintWizard
 {
@@ -131,18 +131,20 @@ namespace PrintWizard
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
-                Width = 150,
+                Width = 100,
                 Height = 22,
-                Size = RibbonItemSize.Large
-            };
+                Size = RibbonItemSize.Large,
+                IsEnabled = false
+            };            
+
             Autodesk.Windows.RibbonTextBox tbAttrLabelName = new RibbonTextBox
             {
-                Id = "tbAttrLabelName",
+                Id = "comboAttrLabelName",
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
-                Width = 150,
+                Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large
             };
@@ -153,10 +155,36 @@ namespace PrintWizard
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
-                Width = 150,
+                Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large
             };
+
+            Autodesk.Windows.RibbonCombo comboPlotterType = new RibbonCombo
+            {
+                Id = "comboPlotterType",
+                Width = 250,
+                Height = 22,
+                Size = RibbonItemSize.Large
+            };
+
+            foreach (var plotter in Extensions.GetPlotterNameList())
+            {
+                comboPlotterType.Items.Add(plotter);
+            }
+
+            Autodesk.Windows.RibbonCombo comboSheetSize = new RibbonCombo
+            {
+                Id = "comboSheetSize",
+                Width = 250,
+                Height = 22,
+                Size = RibbonItemSize.Large
+            };
+
+            foreach (var sheetSize in Extensions.GetMediaNameList())
+            {
+                comboPlotterType.Items.Add(sheetSize.Key);
+            }
 
             RibbonRowPanel row1 = new RibbonRowPanel();
             row1.Items.Add(labelBlockName);
@@ -173,7 +201,12 @@ namespace PrintWizard
             row2.Items.Add(new RibbonRowBreak());
             row2.Items.Add(tbAttrSheetName);
             source.Items.Add(row2);
-
+            source.Items.Add(new RibbonPanelBreak());
+            RibbonRowPanel row3 = new RibbonRowPanel();
+            row3.Items.Add(comboPlotterType);
+            row3.Items.Add(new RibbonRowBreak());
+            row3.Items.Add(comboSheetSize);
+            source.Items.Add(row3);
             // кнопки 
             // -удалить листы
             // -добавить листы

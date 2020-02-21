@@ -96,6 +96,7 @@ namespace PrintWizard
                     //    $" Ymin {plotObject.extents.MinPoint.Y.ToString()};");
                     lc.CreateMyLayout(MyPageSize, MyPageStyle, MyPlotter, plotObject);
                 }
+                ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа.\n");
                 // print all layouts
                 String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
                 //MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath);
@@ -171,7 +172,6 @@ namespace PrintWizard
                 }
                 tr.Commit();
             }
-            System.Windows.MessageBox.Show(plotObjects.Count.ToString() + " block references were found in current modelspace.");
             return plotObjects;
         }
         public static void PlotBlocks(List<PlotObject> plotObjects,
@@ -257,7 +257,7 @@ namespace PrintWizard
                                         if (String.Compare(btr.Name, MyBlock_Name) == 0) ;
                                         layoutsToPlot.Add(btrId);
                                     }
-                                    ed.WriteMessage(layoutsToPlot.Count.ToString());
+
                                     int numSheet = 1;
                                     using (Pt.PlotProgressDialog ppd = new Pt.PlotProgressDialog(false, 1, true))
                                     {

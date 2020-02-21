@@ -21,17 +21,24 @@ namespace PrintWizard
             {
                 // Create and select a new layout tab
                 //ed.WriteMessage(plotObject.label);
-                String layoutName;
+                String layoutName = null;
                 if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
                 {
                     layoutName = plotObject.label + " Лист " + plotObject.sheet;
                 }
-                else
+                if(String.IsNullOrEmpty(layoutName))
+                    return;
+
+                try
                 {
-                    Random rnd = new Random();
-                    layoutName = rnd.Next(10000000, 99999999).ToString();
+                    LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception e)
+                {
+                    ;
                 }
                 var id = LayoutManager.Current.CreateAndMakeLayoutCurrent(layoutName);
+
                 // Open the created layout
                 if (id != null)
                 {
@@ -46,32 +53,33 @@ namespace PrintWizard
                       plotter
                     );
 
+
                     ext = Extensions.Strip(plotObject.extents); //lay.GetMaximumExtents();
 
                     lay.ApplyToViewport(
                       tr, 2,
                       vp =>
                       {
-                      // Size the viewport according to the extents calculated when
-                      // we set the PlotSettings (device, page size, etc.)
-                      // Use the standard 10% margin around the viewport
-                      // (found by measuring pixels on screenshots of Layout1, etc.)
-                      vp.ResizeViewport(ext, 0.98);
-                      // Adjust the view so that the model contents fit
-                      if (ValidDbExtents(db.Extmin, db.Extmax))
+                              // Size the viewport according to the extents calculated when
+                              // we set the PlotSettings (device, page size, etc.)
+                              // Use the standard 10% margin around the viewport
+                              // (found by measuring pixels on screenshots of Layout1, etc.)
+                              vp.ResizeViewport(ext, 0.98);
+                              // Adjust the view so that the model contents fit
+                              if (ValidDbExtents(db.Extmin, db.Extmax))
                           {
                               vp.FitContentToViewport(plotObject.extents, 1);//(new Extents3d(db.Extmin, db.Extmax), 0.98);
-                      }
-
-                      // Finally we lock the view to prevent meddling
-                      vp.Locked = true;
+                          }
+                              // Finally we lock the view to prevent meddling
+                              vp.Locked = true;
                       }
                     );
+
                 }
                 // Commit the transaction
                 tr.Commit();
             }
-            
+
             // Zoom so that we can see our new layout, again with a little padding
             //ed.Command("_.ZOOM", "_E");
             //ed.Command("_.ZOOM", ".7X");
@@ -93,23 +101,19 @@ namespace PrintWizard
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
-            Editor ed = doc.Editor;
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
                 // ACAD_LAYOUT dictionary.
                 DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
                 // Iterate dictionary entries.
-                if (layoutDict.Count > 2)
-                {
                     foreach (DBDictionaryEntry de in layoutDict)
                     {
                         string layoutName = de.Key;
-                        if (layoutName != "Model")
+                        if (layoutName != "Model" && layoutName != "Лист1")
                         {
                             LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
                         }
                     }
-                }
                 tr.Commit();
             }
         }
