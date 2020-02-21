@@ -77,6 +77,9 @@ namespace PrintWizard
                 return;
             Ed.Editor ed = doc.Editor;
             Db.Database db = doc.Database;
+
+            EraseAllLayouts();
+
             using (doc.LockDocument())
             {
                 List<PlotObject> plotObjects = GetBlockReferenceBoundaries(MyBlock_Name);

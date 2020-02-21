@@ -2,6 +2,9 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.ApplicationServices;
+
 
 namespace PrintWizard
 {
@@ -61,7 +64,16 @@ namespace PrintWizard
             // If it doesn't exist, we create it
             if (!objId.IsValid)
             {
-                objId = lm.CreateLayout(name);
+                try
+                {
+                    objId = lm.CreateLayout(name);
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception e)
+                {
+                    Document doc = Application.DocumentManager.MdiActiveDocument;
+                    Editor ed = doc.Editor;
+                    ed.WriteMessage("Exception caught : \n" + e.ToString());
+                }
             }
             // And finally we select it
             if (select)

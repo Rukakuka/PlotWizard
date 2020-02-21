@@ -28,28 +28,30 @@ namespace PrintWizard
                 }
                 else
                 {
-                    Random rnd = new Random();                    
+                    Random rnd = new Random();
                     layoutName = rnd.Next(10000000, 99999999).ToString();
                 }
                 var id = LayoutManager.Current.CreateAndMakeLayoutCurrent(layoutName);
                 // Open the created layout
-                var lay = (Layout)tr.GetObject(id, OpenMode.ForWrite);
-                // Make some settings on the layout and get its extents
-                lay.SetPlotSettings(
-                  //"ANSI_B_(11.00_x_17.00_Inches)",
-                  //"monochrome.ctb", //"acad.ctb",
-                  //"DWF6 ePlot.pc3"
-                  pageSize,
-                  styleSheet,
-                  plotter
-                );
+                if (id != null)
+                {
+                    var lay = (Layout)tr.GetObject(id, OpenMode.ForWrite);
+                    // Make some settings on the layout and get its extents
+                    lay.SetPlotSettings(
+                      //"ANSI_B_(11.00_x_17.00_Inches)",
+                      //"monochrome.ctb", //"acad.ctb",
+                      //"DWF6 ePlot.pc3"
+                      pageSize,
+                      styleSheet,
+                      plotter
+                    );
 
-                ext = Extensions.Strip(plotObject.extents); //lay.GetMaximumExtents();
+                    ext = Extensions.Strip(plotObject.extents); //lay.GetMaximumExtents();
 
-                lay.ApplyToViewport(
-                  tr, 2,
-                  vp =>
-                  {
+                    lay.ApplyToViewport(
+                      tr, 2,
+                      vp =>
+                      {
                       // Size the viewport according to the extents calculated when
                       // we set the PlotSettings (device, page size, etc.)
                       // Use the standard 10% margin around the viewport
@@ -57,17 +59,19 @@ namespace PrintWizard
                       vp.ResizeViewport(ext, 0.98);
                       // Adjust the view so that the model contents fit
                       if (ValidDbExtents(db.Extmin, db.Extmax))
-                      {
-                          vp.FitContentToViewport(plotObject.extents, 1);//(new Extents3d(db.Extmin, db.Extmax), 0.98);
+                          {
+                              vp.FitContentToViewport(plotObject.extents, 1);//(new Extents3d(db.Extmin, db.Extmax), 0.98);
                       }
 
                       // Finally we lock the view to prevent meddling
                       vp.Locked = true;
-                  }
-                );
+                      }
+                    );
+                }
                 // Commit the transaction
                 tr.Commit();
             }
+            
             // Zoom so that we can see our new layout, again with a little padding
             //ed.Command("_.ZOOM", "_E");
             //ed.Command("_.ZOOM", ".7X");
@@ -95,12 +99,15 @@ namespace PrintWizard
                 // ACAD_LAYOUT dictionary.
                 DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
                 // Iterate dictionary entries.
-                foreach (DBDictionaryEntry de in layoutDict)
+                if (layoutDict.Count > 2)
                 {
-                    string layoutName = de.Key;
-                    if (layoutName != "Model")
+                    foreach (DBDictionaryEntry de in layoutDict)
                     {
-                        LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
+                        string layoutName = de.Key;
+                        if (layoutName != "Model")
+                        {
+                            LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
+                        }
                     }
                 }
                 tr.Commit();

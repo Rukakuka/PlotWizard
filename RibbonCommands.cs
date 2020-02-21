@@ -7,6 +7,38 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Input;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.Windows;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Windows.Media.Imaging;
+using WApplication = System.Windows.Forms;
+using System.Collections.Specialized;
+using System.Threading;
+using System.Diagnostics;
+using acad = Autodesk.AutoCAD.ApplicationServices.Application;
+using Ap = Autodesk.AutoCAD.ApplicationServices;
+using Db = Autodesk.AutoCAD.DatabaseServices;
+using Ed = Autodesk.AutoCAD.EditorInput;
+using Rt = Autodesk.AutoCAD.Runtime;
+using Gm = Autodesk.AutoCAD.Geometry;
+using Wn = Autodesk.AutoCAD.Windows;
+using Hs = Autodesk.AutoCAD.DatabaseServices.HostApplicationServices;
+using Us = Autodesk.AutoCAD.DatabaseServices.SymbolUtilityServices;
+using Br = Autodesk.AutoCAD.BoundaryRepresentation;
+using Pt = Autodesk.AutoCAD.PlottingServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.PlottingServices;
 
 
 namespace PrintWizard
@@ -68,7 +100,7 @@ namespace PrintWizard
         {
             Autodesk.Windows.RibbonPanelSource source = new Autodesk.Windows.RibbonPanelSource();
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
-            Autodesk.Windows.RibbonPanel plotWizardTab = new RibbonPanel
+            Autodesk.Windows.RibbonPanel plotWizardPanel = new RibbonPanel
             {
                 Source = source,
                 Id = "plotwizard"
@@ -77,18 +109,19 @@ namespace PrintWizard
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
-                Text = "Имя блока для печати",
-                Width = 150
+                Text = "Имя блока для печати  ",
+                Height = 22,
             };
             RibbonLabel labelAttrLabelName = new RibbonLabel
             {
-                Text = "Имя атрибут - чертеж",
-                Width = 150
+                Text = "Имя атрибут - чертеж  ",
+                Height = 22,
             };
+            
             RibbonLabel labelAttrSheetName = new RibbonLabel
             {
-                Text = "Имя атрибута - лист",
-                Width = 150
+                Text = "Имя атрибута - лист  ",
+                Height = 22,
             };
 
             Autodesk.Windows.RibbonTextBox tbBlockName = new RibbonTextBox
@@ -99,6 +132,7 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Width = 150,
+                Height = 22,
                 Size = RibbonItemSize.Large
             };
             Autodesk.Windows.RibbonTextBox tbAttrLabelName = new RibbonTextBox
@@ -109,6 +143,7 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Width = 150,
+                Height = 22,
                 Size = RibbonItemSize.Large
             };
             Autodesk.Windows.RibbonTextBox tbAttrSheetName = new RibbonTextBox
@@ -119,18 +154,25 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Width = 150,
+                Height = 22,
                 Size = RibbonItemSize.Large
             };
 
-            RibbonRowPanel panelRow1 = new RibbonRowPanel();
-            panelRow1.Items.Add(labelBlockName);
-            panelRow1.Items.Add(tbBlockName);
-            panelRow1.Items.Add(new RibbonRowBreak());
-            panelRow1.Items.Add(labelAttrLabelName);
-            panelRow1.Items.Add(tbAttrLabelName);
-            panelRow1.Items.Add(new RibbonRowBreak());
-            panelRow1.Items.Add(labelAttrSheetName);
-            panelRow1.Items.Add(tbAttrSheetName);
+            RibbonRowPanel row1 = new RibbonRowPanel();
+            row1.Items.Add(labelBlockName);
+            row1.Items.Add(new RibbonRowBreak());
+            row1.Items.Add(labelAttrLabelName);
+            row1.Items.Add(new RibbonRowBreak());
+            row1.Items.Add(labelAttrSheetName);
+            source.Items.Add(row1);
+            //source.Items.Add(new RibbonPanelBreak());
+            RibbonRowPanel row2 = new RibbonRowPanel();
+            row2.Items.Add(tbBlockName);
+            row2.Items.Add(new RibbonRowBreak());
+            row2.Items.Add(tbAttrLabelName);
+            row2.Items.Add(new RibbonRowBreak());
+            row2.Items.Add(tbAttrSheetName);
+            source.Items.Add(row2);
 
             // кнопки 
             // -удалить листы
@@ -145,12 +187,14 @@ namespace PrintWizard
             // - тип принтера
             // - формат листа
 
-            source.Items.Add(panelRow1);
+
+
             foreach (var tab in ribbon.Tabs)
             {
                 if (tab.Title.Equals("Вывод"))
                 {
-                    tab.Panels.Add(plotWizardTab);
+                    tab.Panels.Add(plotWizardPanel);
+                    tab.IsActive = true;
                     break;
                 }
             }
