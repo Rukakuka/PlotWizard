@@ -91,8 +91,7 @@ namespace PrintWizard
                     //    $" Ymax {plotObject.extents.MaxPoint.Y.ToString()};\n" +
                     //    $" Xmin {plotObject.extents.MinPoint.X.ToString()};\n" +
                     //    $" Ymin {plotObject.extents.MinPoint.Y.ToString()};");
-                    String layoutName = plotObject.label + " Лист " + plotObject.sheet;
-                    lc.CreateMyLayout(MyPageSize, MyPageStyle, MyPlotter, plotObject, layoutName);
+                    lc.CreateMyLayout(MyPageSize, MyPageStyle, MyPlotter, plotObject);
                 }
                 // print all layouts
                 String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
@@ -105,6 +104,19 @@ namespace PrintWizard
             // Updates AutoCAD GUI to relect changes.
             ed.Regen();
         }
+        [Rt.CommandMethod("ADDMYRIBBONPANEL", Rt.CommandFlags.Modal)]
+        public static void AddMyRibbonPanel()
+        {
+            RibbonCommands rbCommands = new RibbonCommands();
+            rbCommands.AddMyRibbonPanel();
+        }
+
+        [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
+        public static void EraseAllLayouts()
+        {
+            LayoutCommands.EraseAllLayouts();
+        }
+
 
         private static List<PlotObject> GetBlockReferenceBoundaries(String targetBlock)
         {

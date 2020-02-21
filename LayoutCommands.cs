@@ -9,7 +9,7 @@ namespace PrintWizard
 {
     public class LayoutCommands
     {
-        public void CreateMyLayout(String pageSize, String styleSheet, String plotter, PlotObject plotObject, String layoutName)
+        public void CreateMyLayout(String pageSize, String styleSheet, String plotter, PlotObject plotObject)
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
@@ -21,6 +21,16 @@ namespace PrintWizard
             {
                 // Create and select a new layout tab
                 //ed.WriteMessage(plotObject.label);
+                String layoutName;
+                if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
+                {
+                    layoutName = plotObject.label + " Лист " + plotObject.sheet;
+                }
+                else
+                {
+                    Random rnd = new Random();                    
+                    layoutName = rnd.Next(10000000, 99999999).ToString();
+                }
                 var id = LayoutManager.Current.CreateAndMakeLayoutCurrent(layoutName);
                 // Open the created layout
                 var lay = (Layout)tr.GetObject(id, OpenMode.ForWrite);
@@ -75,7 +85,6 @@ namespace PrintWizard
                 max.X < 0 && max.Y < 0 && max.Z < 0);
         }
 
-        [Rt.CommandMethod("ERASE_ALL_LAYOUTS", Rt.CommandFlags.Modal)]
         public static void EraseAllLayouts()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
