@@ -276,11 +276,11 @@ namespace PrintWizard
 
                 foreach (string mediaName in acPlSetVdr.GetCanonicalMediaNameList(plSet))
                 {
-                    acDoc.Editor.WriteMessage("\n  " + mediaName + " | " +
-                                              acPlSetVdr.GetLocaleMediaName(plSet, cnt));
+                    //acDoc.Editor.WriteMessage("\n  " + mediaName + " | " +
+                    //                          acPlSetVdr.GetLocaleMediaName(plSet, cnt));
                     try
                     {
-                        ml.Add(mediaName, acPlSetVdr.GetLocaleMediaName(plSet, cnt));
+                        ml.Add(acPlSetVdr.GetLocaleMediaName(plSet, cnt), mediaName);
                     }
                     catch
                     {; }

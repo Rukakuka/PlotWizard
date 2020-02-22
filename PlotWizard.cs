@@ -62,15 +62,21 @@ namespace PrintWizard
                 return acedTrans_x64(point, fromRb, toRb, disp, result);
         }
 
-        private const string MyBlock_Name = "ListSPDSF6_A42";
-        private const string MyBlockAttr_Label = "ЧЕРТНИЗ";
-        private const string MyBLockAttr_Sheet = "ЛИСТ";
+        public static string MyBlock_Name = "";
+        public static string MyBlockAttr_Label = "";
+        public static string MyBLockAttr_Sheet = "";
+
         private const string MyPlotter = "DWG To PDF.pc3";
         private const string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)"; // "ISO_full_bleed_A4_(297.00_x_210.00_MM)";
+
         private const string MyPageStyle = "acad.ctb";
 
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
         public static void Plotwizard()
+        {
+            AddMyRibbonPanel();
+        }
+        public static void CreateLayouts()
         {
             Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
@@ -108,7 +114,7 @@ namespace PrintWizard
             // Updates AutoCAD GUI to relect changes.
             ed.Regen();
         }
-        [Rt.CommandMethod("ADDMYRIBBONPANEL", Rt.CommandFlags.Modal)]
+        
         public static void AddMyRibbonPanel()
         {
             RibbonCommands rbCommands = new RibbonCommands();
