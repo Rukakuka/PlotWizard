@@ -21,23 +21,27 @@ namespace PrintWizard
             {
                 // Create and select a new layout tab
                 //ed.WriteMessage(plotObject.label);
+
                 String layoutName = null;
-                if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
-                {
-                    layoutName = plotObject.label + " Лист " + plotObject.sheet;
-                }
-                if(String.IsNullOrEmpty(layoutName))
+                layoutName = plotObject.label + " Лист " + plotObject.sheet;
+                layoutName = layoutName.Trim();
+
+                //if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
+                // System.Windows.MessageBox.Show($"Атрибут блока не содержит символов.\nВхождение блока  пропущено.");
+
+                if (String.IsNullOrEmpty(layoutName))
                     return;
 
-                try
-                {
-                    LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
-                }
-                catch (Autodesk.AutoCAD.Runtime.Exception e)
-                {
-                    ;
-                }
-                var id = LayoutManager.Current.CreateAndMakeLayoutCurrent(layoutName);
+                ObjectId id;
+                string overridedLayoutName = layoutName;
+                    int i = 1;
+                    while (CheckForDuplicates(overridedLayoutName))
+                    {
+                        overridedLayoutName = layoutName + $" ({i.ToString()})";
+                        i++;
+                    }
+
+                id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
 
                 // Open the created layout
                 if (id != null)
@@ -96,24 +100,58 @@ namespace PrintWizard
               !(min.X > 0 && min.Y > 0 && min.Z > 0 &&
                 max.X < 0 && max.Y < 0 && max.Z < 0);
         }
-
-        public static void EraseAllLayouts()
+        public static bool CheckForDuplicates(string layoutName)
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
+            bool duplicate = false;
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                // ACAD_LAYOUT dictionary.
-                DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
+                DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
+                
                 // Iterate dictionary entries.
-                    foreach (DBDictionaryEntry de in layoutDict)
+                foreach (DBDictionaryEntry de in layoutDict)
+                {
+                    string name = de.Key;
+                    if (name.Equals(layoutName))
                     {
-                        string layoutName = de.Key;
-                        if (layoutName != "Model" && layoutName != "Лист1")
+                        duplicate = true;
+                        break;
+                    }
+                }
+                tr.Commit();
+            }
+            return duplicate;
+        }
+        public static void EraseAllLayouts()
+        {
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            if (doc == null || doc.IsDisposed)
+                return;
+
+            Database db = doc.Database;
+            LayoutManager lm = LayoutManager.Current;
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
+
+                // Iterate dictionary entries.
+                foreach (DBDictionaryEntry de in layoutDict)
+                {
+                    string layoutName = de.Key;
+                    if (layoutName != "Model" && layoutName != "Лист1")
+                    {
+                        try
                         {
-                            LayoutManager.Current.DeleteLayout(layoutName); // Delete layout.
+                            lm.DeleteLayout(layoutName); // Delete layout.
+                        }
+                        catch (Exception e)
+                        {
+                            System.Windows.MessageBox.Show($"Tried to delete layout with name '{layoutName}' \n" + e.ToString());
                         }
                     }
+                }
                 tr.Commit();
             }
         }

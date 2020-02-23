@@ -76,20 +76,18 @@ namespace PrintWizard
         {
             AddMyRibbonPanel();
         }
+
+        [Rt.CommandMethod("CREATELAYOUTS", Rt.CommandFlags.Modal)]
         public static void CreateLayouts()
         {
             Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 return;
             Ed.Editor ed = doc.Editor;
-            Db.Database db = doc.Database;
-
-            EraseAllLayouts();
 
             using (doc.LockDocument())
             {
                 List<PlotObject> plotObjects = GetBlockReferenceBoundaries(MyBlock_Name);
-
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
@@ -102,7 +100,8 @@ namespace PrintWizard
                     //    $" Ymin {plotObject.extents.MinPoint.Y.ToString()};");
                     lc.CreateMyLayout(MyPageSize, MyPageStyle, MyPlotter, plotObject);
                 }
-                ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа.\n");
+
+                ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
                 // print all layouts
                 String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
                 //MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath);
@@ -114,12 +113,6 @@ namespace PrintWizard
             // Updates AutoCAD GUI to relect changes.
             ed.Regen();
         }
-        
-        public static void AddMyRibbonPanel()
-        {
-            RibbonCommands rbCommands = new RibbonCommands();
-            rbCommands.AddMyRibbonPanel();
-        }
 
         [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
         public static void EraseAllLayouts()
@@ -127,6 +120,11 @@ namespace PrintWizard
             LayoutCommands.EraseAllLayouts();
         }
 
+        public static void AddMyRibbonPanel()
+        {
+            RibbonCommands rbCommands = new RibbonCommands();
+            rbCommands.AddMyRibbonPanel();
+        }
 
         private static List<PlotObject> GetBlockReferenceBoundaries(String targetBlock)
         {

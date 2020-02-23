@@ -2,10 +2,13 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
-
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Windows.Media.Imaging;
+using System.Windows.Forms;
 
 namespace PrintWizard
 {
@@ -71,7 +74,7 @@ namespace PrintWizard
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception e)
                 {
-                    Document doc = Application.DocumentManager.MdiActiveDocument;
+                    Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
                     Editor ed = doc.Editor;
                     ed.WriteMessage("\nException caught : \n" + e.ToString());
                 }
@@ -263,7 +266,7 @@ namespace PrintWizard
         }
         public static Dictionary<string,string> GetMediaNameList()
         {
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            Document acDoc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Dictionary<string, string> ml = new Dictionary<string, string>();
             using (PlotSettings plSet = new PlotSettings(true))
             {
@@ -289,5 +292,16 @@ namespace PrintWizard
             }
             return ml;
         }
+        public static BitmapImage GetBitmap(Bitmap image)
+        {
+            MemoryStream stream = new MemoryStream();
+            image.Save(stream, ImageFormat.Png);
+            BitmapImage bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.StreamSource = stream;
+            bmp.EndInit();
+            return bmp;
+        }
+
     }
 }

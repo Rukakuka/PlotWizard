@@ -54,19 +54,7 @@ using System.Xml.Serialization;
 
 namespace PrintWizard
 {
-    public static class Images
-    {
-        public static BitmapImage GetBitmap(Bitmap image)
-        {
-            MemoryStream stream = new MemoryStream();
-            image.Save(stream, ImageFormat.Png);
-            BitmapImage bmp = new BitmapImage();
-            bmp.BeginInit();
-            bmp.StreamSource = stream;
-            bmp.EndInit();
-            return bmp;
-        }
-    }
+   
     public class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
@@ -81,7 +69,6 @@ namespace PrintWizard
         {
             if (parameter is Autodesk.Windows.RibbonTextBox tb)
             {
-                System.Windows.MessageBox.Show(tb.Name);
                 switch (tb.Name)
                 {
                     case "tbBlockName":
@@ -97,7 +84,7 @@ namespace PrintWizard
             }
         }
     }
-    public class ButtonCreateLayoutsCommandHandler : System.Windows.Input.ICommand
+    public class ButtonCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
         public bool CanExecute(object param)
@@ -106,9 +93,18 @@ namespace PrintWizard
         }
         public void Execute(object parameter)
         {
-            PlotWizard.CreateLayouts();
+            if (parameter is RibbonCommandItem ribbonItem)
+            {
+                var doc = acad.DocumentManager.MdiActiveDocument;
+                //Make sure the command text either ends with ";", or a " "
+                string cmdText = ((string)ribbonItem.CommandParameter).Trim();
+                if (!cmdText.EndsWith(";"))
+                    cmdText += " ";
+                doc.SendStringToExecute(cmdText, true, false, true);
+            }
         }
     }
+
     public class ButtonChooseBlockCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
@@ -118,7 +114,6 @@ namespace PrintWizard
         }
         public void Execute(object parameter)
         {
-            System.Windows.MessageBox.Show("0");
             if (parameter is RibbonCommandItem ribbonItem)
             {
                 Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
@@ -128,12 +123,12 @@ namespace PrintWizard
 
                 using (doc.LockDocument())
                 {
-                    System.Windows.MessageBox.Show("1");
+
                     Ed.PromptEntityOptions peo = new Ed.PromptEntityOptions("\nВыберите экземпляр вхождения блока:");
 
-                    peo.SetRejectMessage("\nВыберите экземпляр вхождения блока:");
+                    peo.SetRejectMessage("\nВыбранный объект не является вхождением блока.\n");
                     peo.AddAllowedClass(typeof(Db.BlockReference), false);
-                    System.Windows.MessageBox.Show("2");
+
                     Ed.PromptEntityResult res = ed.GetEntity(peo);
 
                     if (res.Status != Ed.PromptStatus.OK)
@@ -141,30 +136,30 @@ namespace PrintWizard
                         ed.WriteMessage("\nОтмена.\n");
                         return;
                     }
-                    System.Windows.MessageBox.Show("3");
+
                     Db.ObjectId objId = res.ObjectId;
                     Db.Database db = doc.Database;
-                    System.Windows.MessageBox.Show("4");
+
                     using (Db.Transaction tr = db.TransactionManager.StartTransaction())
                     {
-                        System.Windows.MessageBox.Show("5");
+
                         BlockReference br = tr.GetObject(objId, Db.OpenMode.ForRead) as BlockReference;
                         ed.WriteMessage($"\nВыбран блок '{br.Name}'.\n");
-                        System.Windows.MessageBox.Show("6");
+
                         RibbonCommands.blockName = br.Name;
                         Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
-                        System.Windows.MessageBox.Show("7");
+
                         foreach (var tab in ribbon.Tabs)
                         {
                             if (tab.Title.Equals("Вывод"))
                             {
-                                System.Windows.MessageBox.Show("8");
+
                                 var tb = tab.FindItem("tbBlockName") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
                                 {
                                     tb.TextValue = RibbonCommands.blockName;
                                 }
-                                System.Windows.MessageBox.Show("9");
+
                                 List<string> attrCollection = new List<string>();
                                 foreach (ObjectId obj in br.AttributeCollection)
                                 {
@@ -173,43 +168,36 @@ namespace PrintWizard
                                             continue;
                                     attrCollection.Add(attr.Tag);
                                 }
-                                System.Windows.MessageBox.Show("10");
 
                                 AttributesSelector attrSelector = new AttributesSelector(attrCollection);
                                 attrSelector.ShowDialog();
 
-                                System.Windows.MessageBox.Show("11");
                                 RibbonCommands.attrLabelName = AttributesSelector._attrLabel;
                                 RibbonCommands.attrSheetName = AttributesSelector._attrSheet;
-                                System.Windows.MessageBox.Show("12");
                                 tb = tab.FindItem("tbAttrLabel") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
                                     tb.TextValue = RibbonCommands.attrLabelName;
                                 tb = tab.FindItem("tbAttrSheet") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
                                     tb.TextValue = RibbonCommands.attrSheetName;
-                                System.Windows.MessageBox.Show("13");
                                 break;
                             }
                         }
-                        //PlotWizard.MyBlock_Name = RibbonCommands.blockName;
-                        //PlotWizard.MyBlockAttr_Label = RibbonCommands.attrLabelName;
-                        //PlotWizard.MyBLockAttr_Sheet = RibbonCommands.attrSheetName;
-                        System.Windows.MessageBox.Show("14");
+                        PlotWizard.MyBlock_Name = RibbonCommands.blockName;
+                        PlotWizard.MyBlockAttr_Label = RibbonCommands.attrLabelName;
+                        PlotWizard.MyBLockAttr_Sheet = RibbonCommands.attrSheetName;
                         tr.Commit();
                     }
                 }
             }
-            System.Windows.MessageBox.Show("15");
         }
-        public partial class AttributesSelector : Form
+        private partial class AttributesSelector : Form
         {
             public static string _attrLabel;
             public static string _attrSheet;
             public static List<string> _attrCollection = new List<string>();
             public AttributesSelector(List<string> attrCollection)
             {
-                System.Windows.MessageBox.Show("e0");
                 if (attrCollection != null)
                 {
                     _attrCollection = attrCollection;
@@ -281,12 +269,12 @@ namespace PrintWizard
                 Controls.Add(labelAttributesLabel);
                 Controls.Add(labelAttributesSheet);
                 Controls.Add(buttonOk);
-                System.Windows.MessageBox.Show("e11");
+
                 //System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AttributesSelector));
-                //Icon = resources.GetObject("icon_12.Icon") as System.Drawing.Icon;
+                Icon = Icon.FromHandle(Properties.Resources.icon_12.GetHicon());
                 Text = "Выберите атрибуты блока...";
     
-                PerformLayout();
+                PerformLayout();    
             }
             private void buttonOk_Click(object sender, EventArgs e)
             {
@@ -298,7 +286,6 @@ namespace PrintWizard
             }
             private void lbAttributesLabel_SelectedIndexChanged(object sender, EventArgs e)
             {
-                System.Windows.MessageBox.Show("e1");
                 if (!this.lbAttributesLabel.Text.Equals("Нет"))
                 {
                     _attrLabel = this.lbAttributesLabel.Text;
@@ -310,7 +297,6 @@ namespace PrintWizard
             }
             private void lbAttributesSheet_SelectedIndexChanged(object sender, EventArgs e)
             {
-                System.Windows.MessageBox.Show("e2");
                 if (!this.lbAttributesSheet.Text.Equals("Нет"))
                 {
                     _attrSheet = this.lbAttributesSheet.Text;
@@ -406,8 +392,8 @@ namespace PrintWizard
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,
-                Image = Images.GetBitmap(Properties.Resources.icon_13),
-                LargeImage = Images.GetBitmap(Properties.Resources.icon_13)
+                Image = Extensions.GetBitmap(Properties.Resources.icon_13),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_13)
             };
             foreach (var plotter in Extensions.GetPlotterNameList())
             {
@@ -425,8 +411,8 @@ namespace PrintWizard
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,
-                Image = Images.GetBitmap(Properties.Resources.icon_14),
-                LargeImage = Images.GetBitmap(Properties.Resources.icon_14)
+                Image = Extensions.GetBitmap(Properties.Resources.icon_14),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_14)
             };
             foreach (var sheetSize in Extensions.GetMediaNameList())
             {
@@ -443,21 +429,37 @@ namespace PrintWizard
                 CommandHandler = new ButtonChooseBlockCommandHandler(),
                 Text = "Выбрать\nблок",
                 ShowText = true,
-                LargeImage = Images.GetBitmap(Properties.Resources.icon_12),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_12),
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
-                Width = 50
+                Width = 65,
+                MinWidth = 65
             };
 
             Autodesk.Windows.RibbonButton btnCreateLayouts = new Autodesk.Windows.RibbonButton
             {
-                CommandHandler = new ButtonCreateLayoutsCommandHandler(),
+                CommandParameter = "CREATELAYOUTS",
+                CommandHandler = new ButtonCommandHandler(),
                 Text = "Создать\nлисты",
                 ShowText = true,
-                LargeImage = Images.GetBitmap(Properties.Resources.icon_15),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_15),
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
-                Width = 50
+                Width = 65,
+                MinWidth = 65
+            };
+
+            Autodesk.Windows.RibbonButton btnEraseLayouts = new Autodesk.Windows.RibbonButton
+            {
+                CommandParameter = "ERASEALLLAYOUTS",
+                CommandHandler = new ButtonCommandHandler(),
+                Text = "Удалить\nлисты",
+                ShowText = true,
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_16),
+                Size = RibbonItemSize.Large,
+                Orientation = System.Windows.Controls.Orientation.Vertical,
+                Width = 75,
+                MinWidth = 65
             };
 
             RibbonRowPanel row1 = new RibbonRowPanel();
@@ -494,7 +496,9 @@ namespace PrintWizard
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row1);
             panelSource.Items.Add(row2);
-            panelSource.Items.Add(btnCreateLayouts); 
+            panelSource.Items.Add(new RibbonSeparator());
+            panelSource.Items.Add(btnCreateLayouts);
+            panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
 
