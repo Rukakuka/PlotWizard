@@ -3,54 +3,14 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Windows.Media.Imaging;
-using System.Windows.Input;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
-using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.Windows;
-using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Windows.Media.Imaging;
-using WApplication = System.Windows.Forms;
-using System.Collections.Specialized;
-using System.Threading;
-using System.Diagnostics;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
-using Rt = Autodesk.AutoCAD.Runtime;
-using Gm = Autodesk.AutoCAD.Geometry;
-using Wn = Autodesk.AutoCAD.Windows;
-using Hs = Autodesk.AutoCAD.DatabaseServices.HostApplicationServices;
-using Us = Autodesk.AutoCAD.DatabaseServices.SymbolUtilityServices;
-using Br = Autodesk.AutoCAD.BoundaryRepresentation;
-using Pt = Autodesk.AutoCAD.PlottingServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.PlottingServices;
-using System.Collections.Specialized;
-using System;
 using System.Windows.Forms;
-
-using System.IO.Ports;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Globalization;
-using System.Text;
-using System.Linq;
-using System.Xml.Serialization;
 
 namespace PrintWizard
 {
@@ -354,7 +314,8 @@ namespace PrintWizard
         private Autodesk.Windows.RibbonCombo comboSheetSize;
         private Autodesk.Windows.RibbonButton btnChooseBlock;
         private Autodesk.Windows.RibbonButton btnCreateLayouts;
-        private Autodesk.Windows.RibbonButton btnEraseLayouts;        
+        private Autodesk.Windows.RibbonButton btnEraseLayouts;
+        private Autodesk.Windows.RibbonButton btnMultiPlot;
 
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
@@ -582,7 +543,19 @@ namespace PrintWizard
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_16),
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
-                Width = 75,
+                Width = 65,
+                MinWidth = 65
+            };
+
+            btnMultiPlot = new Autodesk.Windows.RibbonButton
+            {
+                CommandParameter = "MULTIPLOT",
+                CommandHandler = new ButtonCommandHandler(),
+                Text = "Печать",
+                ShowText = true,
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_18),
+                Size = RibbonItemSize.Large,
+                Orientation = System.Windows.Controls.Orientation.Vertical,
                 MinWidth = 65
             };
 
@@ -623,6 +596,7 @@ namespace PrintWizard
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
+            panelSource.Items.Add(btnMultiPlot);
 
             panelSource.Items.Add(new RibbonPanelBreak());
             panelSource.Items.Add(labelViewportScaling);

@@ -8,7 +8,7 @@ namespace PrintWizard
 {
     public static class MultiSheetPlot
     {
-        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName)
+        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName, ObjectIdCollection layouts)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
@@ -29,27 +29,38 @@ namespace PrintWizard
                     {
                         // Collect all the paperspace layouts
                         // for plotting
-                        ObjectIdCollection layoutsToPlot = new ObjectIdCollection();
-                        foreach (ObjectId btrId in bt)
+                        //ObjectIdCollection layoutsToPlot = new ObjectIdCollection();
+                        //foreach (ObjectId btrId in bt)
+                        //{
+                        //    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
+                        //    if (btr.IsLayout &&
+                        //        btr.Name.ToUpper() != BlockTableRecord.ModelSpace.ToUpper())
+                        //    {
+                        //        layoutsToPlot.Add(btrId);
+                        //    }
+                        //}
+
+                        if (layouts == null)
+                            return;
+                        if (layouts.IsDisposed)
+                            return;
+                        if (layouts.Count == 0)
                         {
-                            BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-                            if (btr.IsLayout &&
-                                btr.Name.ToUpper() != BlockTableRecord.ModelSpace.ToUpper())
-                            {
-                                layoutsToPlot.Add(btrId);
-                            }
+                            System.Windows.MessageBox.Show("Нет листов для печати");
+                            return;
                         }
-                        System.Windows.MessageBox.Show(layoutsToPlot.Count.ToString());
                         // Create a Progress Dialog to provide info
                         // and allow thej user to cancel
-                        PlotProgressDialog ppd = new PlotProgressDialog(false, layoutsToPlot.Count, true);
+
+                        PlotProgressDialog ppd = new PlotProgressDialog(false, layouts.Count, true);
                         using (ppd)
                         {
                             int numSheet = 1;
-                            foreach (ObjectId btrId in layoutsToPlot)
+                            foreach (ObjectId btrId in layouts)
                             {
-                                BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-                                Layout lo = (Layout)tr.GetObject(btr.LayoutId, OpenMode.ForRead);
+                                //-------------------------------------------------->BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
+
+                                Layout lo = (Layout)tr.GetObject(btrId, OpenMode.ForRead);
                                 // We need a PlotSettings object
                                 // based on the layout settings
                                 // which we then customize
@@ -69,7 +80,7 @@ namespace PrintWizard
                                 psv.SetPlotConfigurationName(ps, plotter, pageSize);
                                 // We need a PlotInfo object
                                 // linked to the layout
-                                pi.Layout = btr.LayoutId;
+                                pi.Layout = btrId;                         //---------------------------> btr.LayoutId;
                                 // Make the layout we're plotting current
                                 LayoutManager.Current.CurrentLayout = lo.LayoutName;
                                 // We need to link the PlotInfo to the
@@ -107,7 +118,7 @@ namespace PrintWizard
                                   doc.Name.Substring(
                                     doc.Name.LastIndexOf("\\") + 1) +
                                   " - sheet " + numSheet.ToString() +
-                                  " of " + layoutsToPlot.Count.ToString();
+                                  " of " + layouts.Count.ToString();
                                 ppd.OnBeginSheet();
                                 ppd.LowerSheetProgressRange = 0;
                                 ppd.UpperSheetProgressRange = 100;
@@ -116,7 +127,7 @@ namespace PrintWizard
                                 pe.BeginPage(
                                   ppi,
                                   pi,
-                                  (numSheet == layoutsToPlot.Count),
+                                  (numSheet == layouts.Count),
                                   null
                                 );
                                 pe.BeginGenerateGraphics(null);
@@ -139,10 +150,10 @@ namespace PrintWizard
                 }
                 else
                 {
-                    ed.WriteMessage(
-                      "\nAnother plot is in progress."
-                    );
+                    ed.WriteMessage("\nОтмена. Принтер занят (другая печать в процессе).\n");
                 }
+                tr.Commit();
+                ed.WriteMessage($"\nПечать завершена. \n");
             }
         }
     }

@@ -9,14 +9,17 @@ namespace PrintWizard
 {
     public class LayoutCommands
     {
-        public void CreateMyLayout(String pageSize, double viewportScaling, double contentScaling, String styleSheet, String plotter, PlotObject plotObject)
+        public ObjectId CreateMyLayout(String pageSize, double viewportScaling, double contentScaling, String styleSheet, String plotter, PlotObject plotObject)
         {
+           
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
-                return;
+                return new ObjectId();
+
             var db = doc.Database;
             var ed = doc.Editor;
             var ext = new Extents2d();
+
             using (var tr = db.TransactionManager.StartTransaction())
             {
                 // Create and select a new layout tab
@@ -29,7 +32,7 @@ namespace PrintWizard
                 // System.Windows.MessageBox.Show($"Атрибут блока не содержит символов.\nВхождение блока  пропущено.");
 
                 if (String.IsNullOrEmpty(layoutName))
-                    return;
+                    return new ObjectId();
 
                 ObjectId id;
                 string overridedLayoutName = layoutName;
@@ -42,6 +45,7 @@ namespace PrintWizard
 
                 id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
 
+                ObjectId layoutId = new ObjectId();
                 // Open the created layout
                 if (id != null)
                 {
@@ -75,11 +79,13 @@ namespace PrintWizard
                         vp.Locked = true;
                     }
                     );
+                    layoutId = lay.Id;
                 }
                 // Commit the transaction
                 tr.Commit();
+                return layoutId;
             }
-
+            
             // Zoom so that we can see our new layout, again with a little padding
             //ed.Command("_.ZOOM", "_E");
             //ed.Command("_.ZOOM", ".7X");

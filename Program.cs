@@ -1,4 +1,12 @@
 ﻿
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.Windows;
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Windows.Media.Imaging;
+using System.Windows.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +39,18 @@ using Br = Autodesk.AutoCAD.BoundaryRepresentation;
 using Pt = Autodesk.AutoCAD.PlottingServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.PlottingServices;
+using System.Collections.Specialized;
+using System;
+using System.Windows.Forms;
+
+using System.IO.Ports;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Globalization;
+using System.Text;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace PrintWizard
 {

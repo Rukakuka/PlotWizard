@@ -16,7 +16,6 @@ using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
 using Gm = Autodesk.AutoCAD.Geometry;
-using Wn = Autodesk.AutoCAD.Windows;
 using Hs = Autodesk.AutoCAD.DatabaseServices.HostApplicationServices;
 using Us = Autodesk.AutoCAD.DatabaseServices.SymbolUtilityServices;
 using Br = Autodesk.AutoCAD.BoundaryRepresentation;
@@ -62,6 +61,7 @@ namespace PrintWizard
                 return acedTrans_x64(point, fromRb, toRb, disp, result);
         }
 
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         public static string MyBlock_Name = "";
         public static string MyBlockAttr_Label = "";
         public static string MyBLockAttr_Sheet = "";
@@ -70,8 +70,10 @@ namespace PrintWizard
         public static double MyContentScaling = 1.003;
 
         public static string MyPlotter = "DWG To PDF.pc3";
-        public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)"; // "ISO_full_bleed_A4_(297.00_x_210.00_MM)";
+        public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
+        private static ObjectIdCollection Layouts; 
         private const string MyPageStyle = "acad.ctb";
 
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
@@ -93,21 +95,27 @@ namespace PrintWizard
                 List<PlotObject> plotObjects = GetBlockReferenceBoundaries(MyBlock_Name);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
-
+                
+                Layouts = new ObjectIdCollection();
                 foreach (var plotObject in plotObjects)
-                    lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
-
+                {
+                    ObjectId lay = lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
+                    if (!lay.IsNull)
+                    {
+                        Layouts.Add(lay);
+                    }
+                }
                 ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
-                // print all layouts
-                String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
-                //MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath);
-                //ed.WriteMessage("\nThe \"{0}\" file created.\n", "");
             }
-
-            // delete all layouts
-            // EraseAllLayouts();
-            // Updates AutoCAD GUI to relect changes.
             ed.Regen();
+        }
+
+        [Rt.CommandMethod("MULTIPLOT", Rt.CommandFlags.Modal)]
+        public static void MultiPlot()
+        {
+            Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
+            String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
+            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath, Layouts);
         }
 
         [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
