@@ -57,12 +57,7 @@ namespace PrintWizard
             // First try to get the layout
             var layId = lm.GetLayoutId(name);
 
-            List<String> forbiddenSymbols = new List<String> {"\\", "<" , ">", "/", ",", "`",
-                                                              "?", ":", ";", "*", "|", "="};
-            foreach (var forbiddenSymbol in forbiddenSymbols)
-            {
-                name = name.Replace(forbiddenSymbol, " ");
-            }
+            name = PurgeString(name);
 
             // If it doesn't exist, we create it
             if (!layId.IsValid)
@@ -252,7 +247,7 @@ namespace PrintWizard
                 Autodesk.AutoCAD.PlottingServices.PlotConfig pltConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig;
                 pltConfig.RefreshMediaNameList();
                 //ed.WriteMessage("\nCurrent Plotter: " + pltConfig.DeviceName);
-                foreach (string canonicalName in pltConfig.CanonicalMediaNames)     
+                foreach (string canonicalName in pltConfig.CanonicalMediaNames)
                 {
                     string localName = pltConfig.GetLocalMediaName(canonicalName);
                     if (!media.ContainsKey(localName))
@@ -283,7 +278,7 @@ namespace PrintWizard
                 }
             }
             return pl;
-        }        
+        }
         public static BitmapImage GetBitmap(Bitmap image)
         {
             MemoryStream stream = new MemoryStream();
@@ -300,5 +295,18 @@ namespace PrintWizard
             return (value < min) ? min : (value > max) ? max : value;
         }
 
+        public static string PurgeString(string str)
+        {
+            if (!String.IsNullOrEmpty(str))
+            {
+                List<String> forbiddenSymbols = new List<String> {"\\", "<" , ">", "/", ",", "`",
+                                                              "?", ":", ";", "*", "|", "="};
+                foreach (var forbiddenSymbol in forbiddenSymbols)
+                {
+                    str = str.Replace(forbiddenSymbol, " ");
+                }
+            }
+            return str;
+        }
     }
 }

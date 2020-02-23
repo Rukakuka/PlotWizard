@@ -11,9 +11,37 @@ using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using System.Windows.Forms;
 using System.Globalization;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.EditorInput;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows;
+
 
 namespace PrintWizard
 {
+    public class NotifyingTextBox : RibbonTextBox
+    {
+        public NotifyingTextBox()
+        {
+            // Register our focus-related event handlers
+            EventManager.RegisterClassHandler(typeof(System.Windows.Controls.TextBox), System.Windows.Controls.TextBox.LostKeyboardFocusEvent, new RoutedEventHandler(OnLostFocus));
+        }
+        private void OnLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is Autodesk.Private.Windows.TextBoxWithImage tb)
+            {
+                if (tb.Text == null)
+                {
+                    tb.Text = "";
+                }
+                string filename = Extensions.PurgeString(tb.Text);
+                RibbonCommands.fileName = filename;
+                PlotWizard.MyFileName = RibbonCommands.fileName;
+                tb.Text = filename;
+            }
+        }
+    }
     public class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
@@ -67,6 +95,17 @@ namespace PrintWizard
                             tb.TextValue = RibbonCommands.contentScaling.ToString();
                         }
                         break;
+                    //case "tbFileName":
+
+                    //    if (tb.TextValue == null)
+                    //    {
+                    //        tb.TextValue = "";
+                    //    }
+                    //    string filename = Extensions.PurgeString(tb.TextValue);
+                    //    RibbonCommands.fileName = filename;
+                    //    PlotWizard.MyFileName = RibbonCommands.fileName;
+                    //    tb.TextValue = filename;
+                    //    break;
                 }
             }
         }
@@ -304,7 +343,9 @@ namespace PrintWizard
         public static string attrSheetName;
         public static double viewportScaling;
         public static double contentScaling;
+        public static string fileName;
 
+        private NotifyingTextBox tbFileName;
         private Autodesk.Windows.RibbonTextBox tbViewportScaling;
         private Autodesk.Windows.RibbonTextBox tbContentScaling;
         private Autodesk.Windows.RibbonTextBox tbBlockName;
@@ -324,9 +365,8 @@ namespace PrintWizard
         {
             if (args.NewValue != null)
             {
-                Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = 
-                    Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig((args.NewValue as RibbonButton).Text);
-                
+                Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig((args.NewValue as RibbonButton).Text);
+
                 PlotWizard.MyPlotter = (args.NewValue as RibbonButton).Text;
 
                 comboSheetSize.Items.Clear();
@@ -375,9 +415,19 @@ namespace PrintWizard
                 Height = 22,
             };
 
-            RibbonLabel labelPlotParameters = new RibbonLabel
+            RibbonLabel labelFileName = new RibbonLabel
             {
-                Text = "Параметры вывода: ",
+                Text = "Имя файла  ",
+                Height = 22,
+            };
+            RibbonLabel labelPlotterType = new RibbonLabel
+            {
+                Text = "Плоттер  ",
+                Height = 22,
+            };
+            RibbonLabel labelSheetSize = new RibbonLabel
+            {
+                Text = "Размер листа  ",
                 Height = 22,
             };
 
@@ -397,6 +447,19 @@ namespace PrintWizard
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_17)
             };
 
+            tbFileName = new NotifyingTextBox
+            {
+                Id = "tbFileName",
+                IsEmptyTextValid = false,
+                AcceptTextOnLostFocus = true,
+                InvokesCommand = true,
+                CommandHandler = new TextboxCommandHandler(),
+                Height = 22,
+                Width = 250,
+                Size = RibbonItemSize.Large,
+                TextValue = ""
+            };
+            
             tbViewportScaling = new RibbonTextBox
             {
                 Id = "tbViewportScaling",
@@ -405,7 +468,8 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Height = 22,
-                Width = 35,
+                Width = 50,
+                MinWidth = 50,
                 Size = RibbonItemSize.Large,
                 TextValue = PlotWizard.MyViewportScaling.ToString()
             };
@@ -418,7 +482,8 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Height = 22,
-                Width = 35,
+                Width = 50,
+                MinWidth = 50,
                 Size = RibbonItemSize.Large,
                 TextValue = PlotWizard.MyContentScaling.ToString(),
             };
@@ -572,13 +637,30 @@ namespace PrintWizard
             row2.Items.Add(tbAttrLabel);
             row2.Items.Add(new RibbonRowBreak());
             row2.Items.Add(tbAttrSheet);
-           
+
             RibbonRowPanel row3 = new RibbonRowPanel();
-            row3.Items.Add(labelPlotParameters);
+            row3.Items.Add(labelFileName);
             row3.Items.Add(new RibbonRowBreak());
-            row3.Items.Add(comboPlotterType);
+            row3.Items.Add(labelPlotterType);
             row3.Items.Add(new RibbonRowBreak());
-            row3.Items.Add(comboSheetSize);
+            row3.Items.Add(labelSheetSize);
+
+            RibbonRowPanel row4 = new RibbonRowPanel();
+            row4.Items.Add(tbFileName);
+            row4.Items.Add(new RibbonRowBreak());
+            row4.Items.Add(comboPlotterType);
+            row4.Items.Add(new RibbonRowBreak());
+            row4.Items.Add(comboSheetSize);
+
+            RibbonRowPanel row01 = new RibbonRowPanel();
+            row01.Items.Add(labelViewportScaling);
+            row01.Items.Add(new RibbonRowBreak());
+            row01.Items.Add(labelContentScaling);
+
+            RibbonRowPanel row02 = new RibbonRowPanel();
+            row02.Items.Add(tbViewportScaling);
+            row02.Items.Add(new RibbonRowBreak());
+            row02.Items.Add(tbContentScaling);
 
             Autodesk.Windows.RibbonPanelSource panelSource = new Autodesk.Windows.RibbonPanelSource()
             {
@@ -596,14 +678,12 @@ namespace PrintWizard
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
+            panelSource.Items.Add(row4);
             panelSource.Items.Add(btnMultiPlot);
 
             panelSource.Items.Add(new RibbonPanelBreak());
-            panelSource.Items.Add(labelViewportScaling);
-            panelSource.Items.Add(tbViewportScaling);
-            panelSource.Items.Add(new RibbonSeparator());
-            panelSource.Items.Add(labelContentScaling);
-            panelSource.Items.Add(tbContentScaling);
+            panelSource.Items.Add(row01);
+            panelSource.Items.Add(row02);
 
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)

@@ -2,16 +2,18 @@
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
-using Rt = Autodesk.AutoCAD.Runtime;
 
 namespace PrintWizard
 {
     public class LayoutCommands
     {
-        public ObjectId CreateMyLayout(String pageSize, double viewportScaling, double contentScaling, String styleSheet, String plotter, PlotObject plotObject)
+        public ObjectId CreateMyLayout(String pageSize, 
+            double viewportScaling, 
+            double contentScaling, 
+            String styleSheet, 
+            String plotter, 
+            PlotObject plotObject)
         {
-           
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
                 return new ObjectId();
@@ -22,19 +24,16 @@ namespace PrintWizard
 
             using (var tr = db.TransactionManager.StartTransaction())
             {
-                // Create and select a new layout tab
-                //ed.WriteMessage(plotObject.label);
-
                 String layoutName = null;
                 layoutName = (plotObject.label + " Лист " + plotObject.sheet).Trim();
 
-                //if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
-                // System.Windows.MessageBox.Show($"Атрибут блока не содержит символов.\nВхождение блока  пропущено.");
-
                 if (String.IsNullOrEmpty(layoutName))
+                {
+                    ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
                     return new ObjectId();
-
-                ObjectId id;
+                }
+                
+                // Consecutevly check if there is already a list with the same name, else add (1), (2) etc. to the name
                 string overridedLayoutName = layoutName;
                 int i = 1;
                 while (CheckForDuplicates(overridedLayoutName))
@@ -43,32 +42,22 @@ namespace PrintWizard
                     i++;
                 }
 
-                id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
-
+                ObjectId id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
                 ObjectId layoutId = new ObjectId();
+
                 // Open the created layout
                 if (id != null)
                 {
                     var lay = (Layout)tr.GetObject(id, OpenMode.ForWrite);
                     // Make some settings on the layout and get its extents
-                    lay.SetPlotSettings(
-                      //"ANSI_B_(11.00_x_17.00_Inches)",
-                      //"monochrome.ctb", //"acad.ctb",
-                      //"DWF6 ePlot.pc3"
-                      pageSize,
-                      styleSheet,
-                      plotter
-                    );
+                    lay.SetPlotSettings(pageSize, styleSheet, plotter);
 
-                    ext = Extensions.Strip(plotObject.extents);   
+                    //ext = Extensions.Strip(plotObject.extents);   
                     ext = lay.GetMaximumExtents(); 
 
                     lay.ApplyToViewport(tr, 2, vp => // lambda
                     {
-                        // Size the viewport according to the extents calculated when
-                        // we set the PlotSettings (device, page size, etc.)
-                        // Use the standard 10% margin around the viewport
-                        // (found by measuring pixels on screenshots of Layout1, etc.)
+                        // Size the viewport according to the extents calculated when we set the PlotSettings (device, page size, etc.)
                         vp.ResizeViewport(ext, Extensions.Clamp(viewportScaling, 0, 1));
                         // Adjust the view so that the model contents fit
                         if (ValidDbExtents(db.Extmin, db.Extmax))

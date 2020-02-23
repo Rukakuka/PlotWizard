@@ -71,6 +71,8 @@ namespace PrintWizard
 
         public static string MyPlotter = "DWG To PDF.pc3";
         public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
+
+        public static string MyFileName = "";
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         private static ObjectIdCollection Layouts; 
@@ -114,8 +116,27 @@ namespace PrintWizard
         public static void MultiPlot()
         {
             Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
-            String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + Path.GetFileName(doc.Name).ToString() + ".pdf";
-            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath, Layouts);
+            string filename;
+            if (String.IsNullOrEmpty(MyFileName))
+            {
+                filename = Path.GetFileName(doc.Name).ToString();
+            }
+            else
+            {
+                filename = MyFileName;
+            }
+
+            if (!String.IsNullOrEmpty(filename))
+            {
+                String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + filename +
+                    Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension;
+                MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath, Layouts);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Имя файла не содержит символов. Измените название чертежа.");
+            }
+
         }
 
         [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
