@@ -493,10 +493,8 @@ namespace PrintWizard
                 Id = "plotwizard"
             };
             panelSource.Items.Add(btnChooseBlock);
-            panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row1);
             panelSource.Items.Add(row2);
-            panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(btnCreateLayouts);
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
@@ -505,7 +503,7 @@ namespace PrintWizard
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)
             {
-                if (tab.Title.Equals("Вывод"))
+                if (tab.Title.Equals("Вывод")) 
                 {
                     tab.Panels.Add(plotWizardPanel);
                     tab.IsActive = true;

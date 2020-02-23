@@ -23,8 +23,7 @@ namespace PrintWizard
                 //ed.WriteMessage(plotObject.label);
 
                 String layoutName = null;
-                layoutName = plotObject.label + " Лист " + plotObject.sheet;
-                layoutName = layoutName.Trim();
+                layoutName = (plotObject.label + " Лист " + plotObject.sheet).Trim();
 
                 //if (!String.IsNullOrEmpty(plotObject.label) && !String.IsNullOrEmpty(plotObject.sheet))
                 // System.Windows.MessageBox.Show($"Атрибут блока не содержит символов.\nВхождение блока  пропущено.");
@@ -34,12 +33,12 @@ namespace PrintWizard
 
                 ObjectId id;
                 string overridedLayoutName = layoutName;
-                    int i = 1;
-                    while (CheckForDuplicates(overridedLayoutName))
-                    {
-                        overridedLayoutName = layoutName + $" ({i.ToString()})";
-                        i++;
-                    }
+                int i = 1;
+                while (CheckForDuplicates(overridedLayoutName))
+                {
+                    overridedLayoutName = layoutName + $" ({i.ToString()})";
+                    i++;
+                }
 
                 id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
 
