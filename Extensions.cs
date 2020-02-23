@@ -244,6 +244,31 @@ namespace PrintWizard
             // vp.ViewHeight *= 1.1, for instance)
             vp.CustomScale *= fac;
         }
+        public static Dictionary<string, string> GetMediaNameList()
+        {
+            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+            Dictionary<string, string> media = new Dictionary<string, string>();
+            try
+            {
+                Autodesk.AutoCAD.PlottingServices.PlotConfig pltConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig;
+                pltConfig.RefreshMediaNameList();
+                //ed.WriteMessage("\nCurrent Plotter: " + pltConfig.DeviceName);
+                foreach (string canonicalName in pltConfig.CanonicalMediaNames)     
+                {
+                    string localName = pltConfig.GetLocalMediaName(canonicalName);
+                    if (!media.ContainsKey(localName))
+                    {
+                        media.Add(localName, canonicalName);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ed.WriteMessage("\nCurrent Plotter not set...");
+            }
+            return media;
+        }
+
         public static List<string> GetPlotterNameList()
         {
             List<string> pl = new List<string>();
@@ -252,46 +277,14 @@ namespace PrintWizard
                 PlotSettingsValidator acPlSetVdr = PlotSettingsValidator.Current;
 
                 int cnt = 0;
-                // Set the Plotter and page size
-                acPlSetVdr.SetPlotConfigurationName(plSet, "DWF6 ePlot.pc3",
-                                                    "ANSI_A_(8.50_x_11.00_Inches)");
 
                 foreach (string plotterName in acPlSetVdr.GetPlotDeviceList())
                 {
-                    //acDoc.Editor.WriteMessage("\n  " + plotterName);
                     pl.Add(plotterName);
                 }
             }
             return pl;
-        }
-        public static Dictionary<string,string> GetMediaNameList()
-        {
-            Document acDoc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Dictionary<string, string> ml = new Dictionary<string, string>();
-            using (PlotSettings plSet = new PlotSettings(true))
-            {
-                PlotSettingsValidator acPlSetVdr = PlotSettingsValidator.Current;
-
-                int cnt = 0;
-                // Set the Plotter and page size
-                acPlSetVdr.SetPlotConfigurationName(plSet, "DWF6 ePlot.pc3",
-                                                    "ANSI_A_(8.50_x_11.00_Inches)");
-
-                foreach (string mediaName in acPlSetVdr.GetCanonicalMediaNameList(plSet))
-                {
-                    //acDoc.Editor.WriteMessage("\n  " + mediaName + " | " +
-                    //                          acPlSetVdr.GetLocaleMediaName(plSet, cnt));
-                    try
-                    {
-                        ml.Add(acPlSetVdr.GetLocaleMediaName(plSet, cnt), mediaName);
-                    }
-                    catch
-                    {; }
-                    cnt = cnt + 1;
-                }
-            }
-            return ml;
-        }
+        }        
         public static BitmapImage GetBitmap(Bitmap image)
         {
             MemoryStream stream = new MemoryStream();
@@ -301,6 +294,11 @@ namespace PrintWizard
             bmp.StreamSource = stream;
             bmp.EndInit();
             return bmp;
+        }
+
+        public static double Clamp(double value, double min, double max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
         }
 
     }

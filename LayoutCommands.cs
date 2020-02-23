@@ -9,7 +9,7 @@ namespace PrintWizard
 {
     public class LayoutCommands
     {
-        public void CreateMyLayout(String pageSize, String styleSheet, String plotter, PlotObject plotObject)
+        public void CreateMyLayout(String pageSize, double viewportScaling, double contentScaling, String styleSheet, String plotter, PlotObject plotObject)
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
@@ -56,28 +56,25 @@ namespace PrintWizard
                       plotter
                     );
 
+                    ext = Extensions.Strip(plotObject.extents);   
+                    ext = lay.GetMaximumExtents(); 
 
-                    ext = Extensions.Strip(plotObject.extents); //lay.GetMaximumExtents();
-
-                    lay.ApplyToViewport(
-                      tr, 2,
-                      vp =>
-                      {
-                              // Size the viewport according to the extents calculated when
-                              // we set the PlotSettings (device, page size, etc.)
-                              // Use the standard 10% margin around the viewport
-                              // (found by measuring pixels on screenshots of Layout1, etc.)
-                              vp.ResizeViewport(ext, 0.98);
-                              // Adjust the view so that the model contents fit
-                              if (ValidDbExtents(db.Extmin, db.Extmax))
-                          {
-                              vp.FitContentToViewport(plotObject.extents, 1);//(new Extents3d(db.Extmin, db.Extmax), 0.98);
-                          }
-                              // Finally we lock the view to prevent meddling
-                              vp.Locked = true;
-                      }
+                    lay.ApplyToViewport(tr, 2, vp => // lambda
+                    {
+                        // Size the viewport according to the extents calculated when
+                        // we set the PlotSettings (device, page size, etc.)
+                        // Use the standard 10% margin around the viewport
+                        // (found by measuring pixels on screenshots of Layout1, etc.)
+                        vp.ResizeViewport(ext, Extensions.Clamp(viewportScaling, 0, 1));
+                        // Adjust the view so that the model contents fit
+                        if (ValidDbExtents(db.Extmin, db.Extmax))
+                        {
+                            vp.FitContentToViewport(plotObject.extents, Extensions.Clamp(contentScaling, 0, (double)Int32.MaxValue));//(new Extents3d(db.Extmin, db.Extmax), 0.98);
+                        }
+                        // Finally we lock the view to prevent meddling
+                        vp.Locked = true;
+                    }
                     );
-
                 }
                 // Commit the transaction
                 tr.Commit();

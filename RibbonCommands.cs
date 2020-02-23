@@ -47,14 +47,13 @@ using System.IO.Ports;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Globalization;
 using System.Text;
 using System.Linq;
 using System.Xml.Serialization;
 
 namespace PrintWizard
 {
-   
     public class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
@@ -68,17 +67,45 @@ namespace PrintWizard
         public void Execute(object parameter)
         {
             if (parameter is Autodesk.Windows.RibbonTextBox tb)
-            {
-                switch (tb.Name)
+            { 
+                switch (tb.Id)
                 {
                     case "tbBlockName":
-                        RibbonCommands.blockName = tb.Text;
+                        RibbonCommands.blockName = tb.TextValue;
                         break;
                     case "tbAttrLabel":
-                        RibbonCommands.attrLabelName = tb.Text;
+                        RibbonCommands.attrLabelName = tb.TextValue;
                         break;
                     case "tbAttrSheet":
-                        RibbonCommands.attrSheetName = tb.Text;
+                        RibbonCommands.attrSheetName = tb.TextValue;
+                        break;
+                    case "tbViewportScaling":
+                        try
+                        {
+                            double sc = double.Parse(tb.TextValue, CultureInfo.InvariantCulture);
+                            sc = Extensions.Clamp(sc,0,1);
+                            tb.TextValue = sc.ToString();
+                            RibbonCommands.viewportScaling = sc;
+                            PlotWizard.MyViewportScaling = RibbonCommands.viewportScaling;
+                        }
+                        catch (System.Exception e)
+                        {
+                            tb.TextValue = RibbonCommands.viewportScaling.ToString();
+                        }
+                        break;
+                    case "tbContentScaling":
+                        try
+                        {
+                            double sc = double.Parse(tb.TextValue, CultureInfo.InvariantCulture);
+                            sc = Extensions.Clamp(sc, 0, (double)Int32.MaxValue);
+                            tb.TextValue = sc.ToString();
+                            RibbonCommands.contentScaling = sc;
+                            PlotWizard.MyContentScaling = RibbonCommands.contentScaling;
+                        }
+                        catch (System.Exception e)
+                        {
+                            tb.TextValue = RibbonCommands.contentScaling.ToString();
+                        }
                         break;
                 }
             }
@@ -86,7 +113,9 @@ namespace PrintWizard
     }
     public class ButtonCommandHandler : System.Windows.Input.ICommand
     {
+#pragma warning disable 67
         public event EventHandler CanExecuteChanged;
+#pragma warning restore 67
         public bool CanExecute(object param)
         {
             return true;
@@ -313,14 +342,61 @@ namespace PrintWizard
         public static string blockName;
         public static string attrLabelName;
         public static string attrSheetName;
-        
+        public static double viewportScaling;
+        public static double contentScaling;
+
+        private Autodesk.Windows.RibbonTextBox tbViewportScaling;
+        private Autodesk.Windows.RibbonTextBox tbContentScaling;
+        private Autodesk.Windows.RibbonTextBox tbBlockName;
+        private Autodesk.Windows.RibbonTextBox tbAttrLabel;
+        private Autodesk.Windows.RibbonTextBox tbAttrSheet;
+        private Autodesk.Windows.RibbonCombo comboPlotterType;
+        private Autodesk.Windows.RibbonCombo comboSheetSize;
+        private Autodesk.Windows.RibbonButton btnChooseBlock;
+        private Autodesk.Windows.RibbonButton btnCreateLayouts;
+        private Autodesk.Windows.RibbonButton btnEraseLayouts;        
 
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
         public void Terminate() { }
-       
+        private void comboPlotterType_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
+        {
+            if (args.NewValue != null)
+            {
+                Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = 
+                    Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig((args.NewValue as RibbonButton).Text);
+                
+                PlotWizard.MyPlotter = (args.NewValue as RibbonButton).Text;
+
+                comboSheetSize.Items.Clear();
+                bool select = true;
+                foreach (var sheetSize in Extensions.GetMediaNameList())
+                {
+                    Autodesk.Windows.RibbonButton btn = new Autodesk.Windows.RibbonButton
+                    {
+                        Text = sheetSize.Key.ToString(),
+                        ShowText = true
+                    };
+                    comboSheetSize.Items.Add(btn);
+                    if (select)
+                    {
+                        select = false;
+                        comboSheetSize.Current = btn;
+                    }
+                }
+            }
+        }
+        private void comboSheetSize_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
+        {
+            if (args.NewValue != null)
+            {
+                PlotWizard.MyPageSize = Extensions.GetMediaNameList()[(args.NewValue as RibbonButton).Text];
+            }
+        }        
         public void AddMyRibbonPanel()
         {
+            Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(PlotWizard.MyPlotter);
+
             RibbonLabel labelBlockName = new RibbonLabel
             {
                 Text = "Имя блока для печати  ",
@@ -344,7 +420,49 @@ namespace PrintWizard
                 Height = 22,
             };
 
-            Autodesk.Windows.RibbonTextBox tbBlockName = new RibbonTextBox
+            RibbonLabel labelViewportScaling = new RibbonLabel
+            {
+                Text = "Масштабирование видового окна  ",
+                Height = 22,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_17),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_17)
+            };
+
+            RibbonLabel labelContentScaling = new RibbonLabel
+            {
+                Text = "Масштабирование содержимого ",
+                Height = 22,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_17),
+                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_17)
+            };
+
+            tbViewportScaling = new RibbonTextBox
+            {
+                Id = "tbViewportScaling",
+                IsEmptyTextValid = false,
+                AcceptTextOnLostFocus = true,
+                InvokesCommand = true,
+                CommandHandler = new TextboxCommandHandler(),
+                Height = 22,
+                Width = 35,
+                Size = RibbonItemSize.Large,
+                TextValue = PlotWizard.MyViewportScaling.ToString()
+            };
+
+            tbContentScaling = new RibbonTextBox
+            {
+                Id = "tbContentScaling",
+                IsEmptyTextValid = false,
+                AcceptTextOnLostFocus = true,
+                InvokesCommand = true,
+                CommandHandler = new TextboxCommandHandler(),
+                Height = 22,
+                Width = 35,
+                Size = RibbonItemSize.Large,
+                TextValue = PlotWizard.MyContentScaling.ToString(),
+            };
+
+            tbBlockName = new RibbonTextBox
             {
                 Id = "tbBlockName",
                 IsEmptyTextValid = false,
@@ -358,7 +476,7 @@ namespace PrintWizard
                 Text = "",
             };
 
-            Autodesk.Windows.RibbonTextBox tbAttrLabel = new RibbonTextBox
+            tbAttrLabel = new RibbonTextBox
             {
                 Id = "tbAttrLabel",
                 IsEmptyTextValid = false,
@@ -372,7 +490,7 @@ namespace PrintWizard
                 Text = ""
             };
 
-            Autodesk.Windows.RibbonTextBox tbAttrSheet = new RibbonTextBox
+            tbAttrSheet = new RibbonTextBox
             {
                 Id = "tbAttrSheet",
                 IsEmptyTextValid = false,
@@ -386,14 +504,12 @@ namespace PrintWizard
                 Text = ""
             };
 
-            Autodesk.Windows.RibbonCombo comboPlotterType = new RibbonCombo
+            comboPlotterType = new RibbonCombo
             {
-                Id = "comboPlotterType",
+                Id = "comboPlotterType",                
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,
-                Image = Extensions.GetBitmap(Properties.Resources.icon_13),
-                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_13)
             };
             foreach (var plotter in Extensions.GetPlotterNameList())
             {
@@ -403,16 +519,19 @@ namespace PrintWizard
                     ShowText = true
                 };
                 comboPlotterType.Items.Add(btn);
-            }
+                if (plotter.Equals(PlotWizard.MyPlotter))
+                {
+                    comboPlotterType.Current = btn;
+                }
+            }            
+            comboPlotterType.CurrentChanged += comboPlotterType_SelectedIndexChanged;
 
-            Autodesk.Windows.RibbonCombo comboSheetSize = new RibbonCombo
+            comboSheetSize = new RibbonCombo
             {
                 Id = "comboSheetSize",
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,
-                Image = Extensions.GetBitmap(Properties.Resources.icon_14),
-                LargeImage = Extensions.GetBitmap(Properties.Resources.icon_14)
             };
             foreach (var sheetSize in Extensions.GetMediaNameList())
             {
@@ -422,9 +541,14 @@ namespace PrintWizard
                     ShowText = true
                 };
                 comboSheetSize.Items.Add(btn);
-            }
+                if (sheetSize.Value.Equals(PlotWizard.MyPageSize, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    comboSheetSize.Current = btn;
+                }
+            }            
+            comboSheetSize.CurrentChanged += comboSheetSize_SelectedIndexChanged;
 
-            Autodesk.Windows.RibbonButton btnChooseBlock = new Autodesk.Windows.RibbonButton
+            btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
                 CommandHandler = new ButtonChooseBlockCommandHandler(),
                 Text = "Выбрать\nблок",
@@ -436,7 +560,7 @@ namespace PrintWizard
                 MinWidth = 65
             };
 
-            Autodesk.Windows.RibbonButton btnCreateLayouts = new Autodesk.Windows.RibbonButton
+            btnCreateLayouts = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "CREATELAYOUTS",
                 CommandHandler = new ButtonCommandHandler(),
@@ -449,7 +573,7 @@ namespace PrintWizard
                 MinWidth = 65
             };
 
-            Autodesk.Windows.RibbonButton btnEraseLayouts = new Autodesk.Windows.RibbonButton
+            btnEraseLayouts = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "ERASEALLLAYOUTS",
                 CommandHandler = new ButtonCommandHandler(),
@@ -499,6 +623,13 @@ namespace PrintWizard
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
+
+            panelSource.Items.Add(new RibbonPanelBreak());
+            panelSource.Items.Add(labelViewportScaling);
+            panelSource.Items.Add(tbViewportScaling);
+            panelSource.Items.Add(new RibbonSeparator());
+            panelSource.Items.Add(labelContentScaling);
+            panelSource.Items.Add(tbContentScaling);
 
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)

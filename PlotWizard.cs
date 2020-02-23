@@ -66,8 +66,11 @@ namespace PrintWizard
         public static string MyBlockAttr_Label = "";
         public static string MyBLockAttr_Sheet = "";
 
-        private const string MyPlotter = "DWG To PDF.pc3";
-        private const string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)"; // "ISO_full_bleed_A4_(297.00_x_210.00_MM)";
+        public static double MyViewportScaling = 1;
+        public static double MyContentScaling = 1.003;
+
+        public static string MyPlotter = "DWG To PDF.pc3";
+        public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)"; // "ISO_full_bleed_A4_(297.00_x_210.00_MM)";
 
         private const string MyPageStyle = "acad.ctb";
 
@@ -92,14 +95,7 @@ namespace PrintWizard
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
                 foreach (var plotObject in plotObjects)
-                {
-                    // create a single layout for each block reference
-                    //System.Windows.MessageBox.Show($"Xmax {plotObject.extents.MaxPoint.X.ToString()};\n" +
-                    //    $" Ymax {plotObject.extents.MaxPoint.Y.ToString()};\n" +
-                    //    $" Xmin {plotObject.extents.MinPoint.X.ToString()};\n" +
-                    //    $" Ymin {plotObject.extents.MinPoint.Y.ToString()};");
-                    lc.CreateMyLayout(MyPageSize, MyPageStyle, MyPlotter, plotObject);
-                }
+                    lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
 
                 ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
                 // print all layouts
