@@ -95,17 +95,6 @@ namespace PrintWizard
                             tb.TextValue = RibbonCommands.contentScaling.ToString();
                         }
                         break;
-                    //case "tbFileName":
-
-                    //    if (tb.TextValue == null)
-                    //    {
-                    //        tb.TextValue = "";
-                    //    }
-                    //    string filename = Extensions.PurgeString(tb.TextValue);
-                    //    RibbonCommands.fileName = filename;
-                    //    PlotWizard.MyFileName = RibbonCommands.fileName;
-                    //    tb.TextValue = filename;
-                    //    break;
                 }
             }
         }
