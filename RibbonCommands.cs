@@ -191,6 +191,7 @@ namespace PrintWizard
 
                                 RibbonCommands.attrLabelName = AttributesSelector._attrLabel;
                                 RibbonCommands.attrSheetName = AttributesSelector._attrSheet;
+
                                 tb = tab.FindItem("tbAttrLabel") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
                                     tb.TextValue = RibbonCommands.attrLabelName;
@@ -212,7 +213,7 @@ namespace PrintWizard
         {
             public static string _attrLabel;
             public static string _attrSheet;
-            public static List<string> _attrCollection = new List<string>();
+            private static List<string> _attrCollection = new List<string>();
             public AttributesSelector(List<string> attrCollection)
             {
                 if (attrCollection != null)
@@ -368,6 +369,7 @@ namespace PrintWizard
                         ShowText = true
                     };
                     comboSheetSize.Items.Add(btn);
+                    // select first sheetSize in list
                     if (select)
                     {
                         select = false;
@@ -389,41 +391,66 @@ namespace PrintWizard
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
-                Text = "Имя блока для печати  ",
-                Height = 22
+                ToolTip = "Имя блока для печати",
+                IsToolTipEnabled = true,
+                Height = 22,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_22)
             };
             RibbonLabel labelAttrLabelName = new RibbonLabel
             {
-                Text = "Имя атрибута - чертеж  ",
-                Height = 22,
+                ToolTip = "Имя атрибута - чертеж",
+                IsToolTipEnabled = true,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_20),
+                Height = 22
             };
             
             RibbonLabel labelAttrSheetName = new RibbonLabel
             {
-                Text = "Имя атрибута - лист  ",
+                ToolTip = "Имя атрибута - лист  ",
+                IsToolTipEnabled = true,
                 Height = 22,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_19)
             };
 
             RibbonLabel labelFileName = new RibbonLabel
             {
-                Text = "Имя файла  ",
+                ToolTip = "Имя файла  ",
+                IsToolTipEnabled = true,
                 Height = 22,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_21)
             };
             RibbonLabel labelPlotterType = new RibbonLabel
             {
-                Text = "Плоттер  ",
+                ToolTip = "Плоттер  ",
+                IsToolTipEnabled = true,
                 Height = 22,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_24)
             };
             RibbonLabel labelSheetSize = new RibbonLabel
             {
-                Text = "Размер листа  ",
+                ToolTip = "Размер листа  ",
+                IsToolTipEnabled = true,
                 Height = 22,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_23)
             };
 
             RibbonLabel labelViewportScaling = new RibbonLabel
             {
                 Text = "Масштабирование видового окна  ",
                 Height = 22,
+                ShowImage = true,
                 Image = Extensions.GetBitmap(Properties.Resources.icon_17),
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_17)
             };
@@ -439,6 +466,8 @@ namespace PrintWizard
             tbFileName = new NotifyingTextBox
             {
                 Id = "tbFileName",
+                ToolTip = "Имя файла  ",
+                IsToolTipEnabled = true,
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
@@ -480,6 +509,8 @@ namespace PrintWizard
             tbBlockName = new RibbonTextBox
             {
                 Id = "tbBlockName",
+                ToolTip = "Имя блока для печати",
+                IsToolTipEnabled = true,
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
@@ -494,6 +525,8 @@ namespace PrintWizard
             tbAttrLabel = new RibbonTextBox
             {
                 Id = "tbAttrLabel",
+                ToolTip = "Имя атрибута - чертеж",
+                IsToolTipEnabled = true,
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
@@ -507,6 +540,8 @@ namespace PrintWizard
 
             tbAttrSheet = new RibbonTextBox
             {
+                ToolTip = "Имя атрибута - лист  ",
+                IsToolTipEnabled = true,
                 Id = "tbAttrSheet",
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
@@ -521,7 +556,9 @@ namespace PrintWizard
 
             comboPlotterType = new RibbonCombo
             {
-                Id = "comboPlotterType",                
+                Id = "comboPlotterType",
+                ToolTip = "Плоттер  ",
+                IsToolTipEnabled = true,
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,
@@ -544,6 +581,8 @@ namespace PrintWizard
             comboSheetSize = new RibbonCombo
             {
                 Id = "comboSheetSize",
+                ToolTip = "Размер листа  ",
+                IsToolTipEnabled = true,
                 Width = 250,
                 Height = 22,
                 Size = RibbonItemSize.Large,

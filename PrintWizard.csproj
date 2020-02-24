@@ -190,6 +190,24 @@
   <ItemGroup>
     <None Include="Resources\icon_18.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_19.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_20.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_21.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_22.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_23.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_24.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

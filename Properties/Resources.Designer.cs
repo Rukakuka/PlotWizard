@@ -163,16 +163,6 @@ namespace PrintWizard.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icon_13 {
-            get {
-                object obj = ResourceManager.GetObject("icon_13", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap icon_14 {
             get {
                 object obj = ResourceManager.GetObject("icon_14", resourceCulture);
@@ -216,6 +206,66 @@ namespace PrintWizard.Properties {
         internal static System.Drawing.Bitmap icon_18 {
             get {
                 object obj = ResourceManager.GetObject("icon_18", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_19 {
+            get {
+                object obj = ResourceManager.GetObject("icon_19", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_20 {
+            get {
+                object obj = ResourceManager.GetObject("icon_20", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_21 {
+            get {
+                object obj = ResourceManager.GetObject("icon_21", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_22 {
+            get {
+                object obj = ResourceManager.GetObject("icon_22", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_23 {
+            get {
+                object obj = ResourceManager.GetObject("icon_23", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon_24 {
+            get {
+                object obj = ResourceManager.GetObject("icon_24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
