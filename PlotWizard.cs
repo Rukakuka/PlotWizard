@@ -73,9 +73,11 @@ namespace PrintWizard
         public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
 
         public static string MyFileName = "";
+
+
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
-        private static ObjectIdCollection Layouts; 
+        private static ObjectIdCollection Layouts = new ObjectIdCollection();
         private const string MyPageStyle = "acad.ctb";
 
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
@@ -98,7 +100,7 @@ namespace PrintWizard
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
                 
-                Layouts = new ObjectIdCollection();
+                
                 foreach (var plotObject in plotObjects)
                 {
                     ObjectId lay = lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
@@ -143,6 +145,7 @@ namespace PrintWizard
         public static void EraseAllLayouts()
         {
             LayoutCommands.EraseAllLayouts();
+            Layouts.Clear();
         }
 
         public static void AddMyRibbonPanel()

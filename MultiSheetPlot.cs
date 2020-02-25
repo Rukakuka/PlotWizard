@@ -133,12 +133,7 @@ namespace PrintWizard
                                     );
                                 }
                                 // Which may contain multiple sheets
-                                ppd.StatusMsgString =
-                                  "Plotting " +
-                                  doc.Name.Substring(
-                                    doc.Name.LastIndexOf("\\") + 1) +
-                                  " - sheet " + numSheet.ToString() +
-                                  " of " + layouts.Count.ToString();
+                                ppd.StatusMsgString = "Plotting " + doc.Name.Substring( doc.Name.LastIndexOf("\\") + 1) + " - sheet " + numSheet.ToString() + " of " + layouts.Count.ToString();
                                 ppd.OnBeginSheet();
                                 ppd.LowerSheetProgressRange = 0;
                                 ppd.UpperSheetProgressRange = 100;
@@ -158,6 +153,7 @@ namespace PrintWizard
                                 ppd.SheetProgressPos = 100;
                                 ppd.OnEndSheet();
                                 numSheet++;
+                                ppd.PlotProgressPos = (int)(((double)numSheet*100)/((double)layouts.Count));
                             }
                             // Finish the document
                             pe.EndDocument(null);
