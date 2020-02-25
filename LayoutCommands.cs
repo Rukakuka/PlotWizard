@@ -27,6 +27,8 @@ namespace PrintWizard
                 String layoutName = null;
                 layoutName = (plotObject.label + " Лист " + plotObject.sheet).Trim();
 
+                layoutName = Extensions.PurgeString(layoutName);
+
                 if (String.IsNullOrEmpty(layoutName))
                 {
                     ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
@@ -48,7 +50,7 @@ namespace PrintWizard
                 // Open the created layout
                 if (id != null)
                 {
-                    var lay = (Layout)tr.GetObject(id, OpenMode.ForWrite);
+                    var lay = tr.GetObject(id, OpenMode.ForWrite) as Layout;
                     // Make some settings on the layout and get its extents
                     lay.SetPlotSettings(pageSize, styleSheet, plotter);
 

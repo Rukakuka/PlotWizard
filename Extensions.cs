@@ -50,14 +50,10 @@ namespace PrintWizard
         {
             return new Extents2d(ex.MinPoint.X, ex.MinPoint.Y, ex.MaxPoint.X, ex.MaxPoint.Y);
         }
-        public static ObjectId CreateAndMakeLayoutCurrent(
-          this LayoutManager lm, string name, bool select = true
-        )
+        public static ObjectId CreateAndMakeLayoutCurrent( this LayoutManager lm, string name, bool select = true)
         {
             // First try to get the layout
             var layId = lm.GetLayoutId(name);
-
-            name = PurgeString(name);
 
             // If it doesn't exist, we create it
             if (!layId.IsValid)
@@ -70,7 +66,7 @@ namespace PrintWizard
                 {
                     Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
                     Editor ed = doc.Editor;
-                    ed.WriteMessage("\nException caught : \n" + e.ToString());
+                    System.Windows.MessageBox.Show("From @CreateAndMakeLayoutCurrent\n" + e.ToString());
                 }
             }
             // And finally we select it

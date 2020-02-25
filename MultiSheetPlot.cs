@@ -46,21 +46,41 @@ namespace PrintWizard
                             return;
                         if (layouts.Count == 0)
                         {
-                            System.Windows.MessageBox.Show("Нет листов для печати");
+                            System.Windows.MessageBox.Show("\nНет листов для печати. Пропущено.\n");
                             return;
                         }
                         // Create a Progress Dialog to provide info
                         // and allow thej user to cancel
+                        int sheetCount = 0;
+                        foreach (ObjectId btrId in layouts)
+                        {
+                            try { 
+                                _ = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
+                            }
+                            catch (Exception e) { // catch erased layout or whatever shit
+                                layouts.RemoveAt(sheetCount);
+                                char[] r  = { '(', ')' };
+                                ed.WriteMessage($"\nЛист c id '{btrId.ToString().Trim(r)}' удалён или создан с ошибками. Пропущено.\n");
+                            }
+                            sheetCount++;
+                        }
 
-                        PlotProgressDialog ppd = new PlotProgressDialog(false, layouts.Count, true);
+                        PlotProgressDialog ppd = new PlotProgressDialog(false, sheetCount, true);
                         using (ppd)
                         {
                             int numSheet = 1;
                             foreach (ObjectId btrId in layouts)
                             {
                                 //-------------------------------------------------->BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-
-                                Layout lo = (Layout)tr.GetObject(btrId, OpenMode.ForRead);
+                                Layout lo = new Layout();
+                                try
+                                {
+                                    lo = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
+                                }
+                                catch (Exception e)
+                                {
+                                    continue;
+                                }
                                 // We need a PlotSettings object
                                 // based on the layout settings
                                 // which we then customize
