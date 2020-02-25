@@ -73,7 +73,7 @@ namespace PrintWizard
         public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
 
         public static string MyFileName = "";
-
+        public static string MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
@@ -117,27 +117,52 @@ namespace PrintWizard
         [Rt.CommandMethod("MULTIPLOT", Rt.CommandFlags.Modal)]
         public static void MultiPlot()
         {
-            Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
+            var doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            if (doc == null)
+                return;
+
+            var db = doc.Database;
+            var ed = doc.Editor;
             string filename;
-            if (String.IsNullOrEmpty(MyFileName))
+
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                filename = Path.GetFileName(doc.Name).ToString();
-            }
-            else
+                Title = "Печать",
+                Filter =  $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
+                            $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}"
+            };
+            bool? result = saveFileDialog.ShowDialog();
+
+            if (!result.HasValue || !result.Value)
             {
-                filename = MyFileName;
+                ed.WriteMessage("\nCommand canceled.");
+                return;
             }
 
-            if (!String.IsNullOrEmpty(filename))
-            {
-                String MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + filename +
-                    Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension;
-                MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, MySavePath, Layouts);
-            }
-            else
-            {
-                System.Windows.MessageBox.Show("Имя файла не содержит символов. Измените название чертежа.");
-            }
+            String FileName = saveFileDialog.FileName;
+
+            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, FileName, Layouts);
+
+            
+            //if (String.IsNullOrEmpty(MyFileName))
+            //{
+            //    filename = Path.GetFileName(doc.Name).ToString();
+            //}
+            //else
+            //{
+            //    filename = MyFileName;
+            //}
+
+            //if (!String.IsNullOrEmpty(filename))
+            //{
+            //    String FullFilepathName = MySavePath + "\\" + filename +
+            //        Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension;
+            //    MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, FullFilepathName, Layouts);
+            //}
+            //else
+            //{
+            //    System.Windows.MessageBox.Show("Имя файла не содержит символов. Измените название чертежа.");
+            //}
 
         }
 

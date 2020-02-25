@@ -11,12 +11,8 @@ using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using System.Windows.Forms;
 using System.Globalization;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.EditorInput;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows;
-
+using System.IO;
 
 namespace PrintWizard
 {
@@ -96,6 +92,33 @@ namespace PrintWizard
                         }
                         break;
                 }
+            }
+        }
+    }
+
+    public class ButtonChooseFilepathCommandHandler : System.Windows.Input.ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+#pragma warning restore 67
+        public bool CanExecute(object param)
+        {
+            return true;
+        }
+        public void Execute(object parameter)
+        {
+            var doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+
+            var ed = doc.Editor;
+            
+            if (doc == null)
+                return;
+
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+
+            DialogResult result = folderBrowserDialog.ShowDialog();
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
+            {
+                System.Windows.Forms.MessageBox.Show(folderBrowserDialog.SelectedPath + "\\");
             }
         }
     }
@@ -347,6 +370,7 @@ namespace PrintWizard
         private Autodesk.Windows.RibbonButton btnCreateLayouts;
         private Autodesk.Windows.RibbonButton btnEraseLayouts;
         private Autodesk.Windows.RibbonButton btnMultiPlot;
+        private Autodesk.Windows.RibbonButton btnChooseFilepath;
 
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
@@ -473,11 +497,23 @@ namespace PrintWizard
                 InvokesCommand = true,
                 CommandHandler = new TextboxCommandHandler(),
                 Height = 22,
-                Width = 250,
+                Width = 227,
                 Size = RibbonItemSize.Large,
                 TextValue = ""
             };
-            
+
+            btnChooseFilepath = new Autodesk.Windows.RibbonButton
+            {
+                CommandHandler = new ButtonChooseFilepathCommandHandler(),
+                Text = "",
+                ShowText = true,
+                Image = Extensions.GetBitmap(Properties.Resources.icon_25),
+                Size = RibbonItemSize.Standard,
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                Width = 22,
+                MinWidth = 22
+            };
+
             tbViewportScaling = new RibbonTextBox
             {
                 Id = "tbViewportScaling",
@@ -667,18 +703,15 @@ namespace PrintWizard
             row2.Items.Add(tbAttrSheet);
 
             RibbonRowPanel row3 = new RibbonRowPanel();
-            row3.Items.Add(labelFileName);
-            row3.Items.Add(new RibbonRowBreak());
+            //row3.Items.Add(labelFileName);
+            //row3.Items.Add(tbFileName);
+            //row3.Items.Add(btnChooseFilepath);
+            //row3.Items.Add(new RibbonRowBreak());
             row3.Items.Add(labelPlotterType);
+            row3.Items.Add(comboPlotterType);
             row3.Items.Add(new RibbonRowBreak());
             row3.Items.Add(labelSheetSize);
-
-            RibbonRowPanel row4 = new RibbonRowPanel();
-            row4.Items.Add(tbFileName);
-            row4.Items.Add(new RibbonRowBreak());
-            row4.Items.Add(comboPlotterType);
-            row4.Items.Add(new RibbonRowBreak());
-            row4.Items.Add(comboSheetSize);
+            row3.Items.Add(comboSheetSize);
 
             RibbonRowPanel row01 = new RibbonRowPanel();
             row01.Items.Add(labelViewportScaling);
@@ -706,9 +739,7 @@ namespace PrintWizard
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
-            panelSource.Items.Add(row4);
             panelSource.Items.Add(btnMultiPlot);
-
             panelSource.Items.Add(new RibbonPanelBreak());
             panelSource.Items.Add(row01);
             panelSource.Items.Add(row02);
