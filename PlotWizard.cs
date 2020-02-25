@@ -72,9 +72,6 @@ namespace PrintWizard
         public static string MyPlotter = "DWG To PDF.pc3";
         public static string MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
 
-        public static string MyFileName = "";
-        public static string MySavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         private static ObjectIdCollection Layouts = new ObjectIdCollection();
@@ -121,13 +118,9 @@ namespace PrintWizard
             if (doc == null)
                 return;
 
-            var db = doc.Database;
-            var ed = doc.Editor;
-            string filename;
-
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                Title = "Печать",
+                Title = "Вывод в файл",
                 Filter =  $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
                             $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}"
             };
@@ -135,13 +128,10 @@ namespace PrintWizard
 
             if (!result.HasValue || !result.Value)
             {
-                ed.WriteMessage("\nCommand canceled.");
+                doc.Editor.WriteMessage("\nОтмена.\n");
                 return;
             }
-
-            String FileName = saveFileDialog.FileName;
-
-            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, FileName, Layouts);
+            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, saveFileDialog.FileName, Layouts);
 
             
             //if (String.IsNullOrEmpty(MyFileName))

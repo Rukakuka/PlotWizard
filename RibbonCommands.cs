@@ -16,28 +16,6 @@ using System.IO;
 
 namespace PrintWizard
 {
-    public class NotifyingTextBox : RibbonTextBox
-    {
-        public NotifyingTextBox()
-        {
-            // Register our focus-related event handlers
-            EventManager.RegisterClassHandler(typeof(System.Windows.Controls.TextBox), System.Windows.Controls.TextBox.LostKeyboardFocusEvent, new RoutedEventHandler(OnLostFocus));
-        }
-        private void OnLostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is Autodesk.Private.Windows.TextBoxWithImage tb)
-            {
-                if (tb.Text == null)
-                {
-                    tb.Text = "";
-                }
-                string filename = Extensions.PurgeString(tb.Text);
-                RibbonCommands.fileName = filename;
-                PlotWizard.MyFileName = RibbonCommands.fileName;
-                tb.Text = filename;
-            }
-        }
-    }
     public class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
@@ -358,7 +336,6 @@ namespace PrintWizard
         public static double contentScaling;
         public static string fileName;
 
-        private NotifyingTextBox tbFileName;
         private Autodesk.Windows.RibbonTextBox tbViewportScaling;
         private Autodesk.Windows.RibbonTextBox tbContentScaling;
         private Autodesk.Windows.RibbonTextBox tbBlockName;
@@ -370,7 +347,6 @@ namespace PrintWizard
         private Autodesk.Windows.RibbonButton btnCreateLayouts;
         private Autodesk.Windows.RibbonButton btnEraseLayouts;
         private Autodesk.Windows.RibbonButton btnMultiPlot;
-        private Autodesk.Windows.RibbonButton btnChooseFilepath;
 
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
@@ -485,33 +461,6 @@ namespace PrintWizard
                 Height = 22,
                 Image = Extensions.GetBitmap(Properties.Resources.icon_17),
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_17)
-            };
-
-            tbFileName = new NotifyingTextBox
-            {
-                Id = "tbFileName",
-                ToolTip = "Имя файла  ",
-                IsToolTipEnabled = true,
-                IsEmptyTextValid = false,
-                AcceptTextOnLostFocus = true,
-                InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
-                Height = 22,
-                Width = 227,
-                Size = RibbonItemSize.Large,
-                TextValue = ""
-            };
-
-            btnChooseFilepath = new Autodesk.Windows.RibbonButton
-            {
-                CommandHandler = new ButtonChooseFilepathCommandHandler(),
-                Text = "",
-                ShowText = true,
-                Image = Extensions.GetBitmap(Properties.Resources.icon_25),
-                Size = RibbonItemSize.Standard,
-                Orientation = System.Windows.Controls.Orientation.Horizontal,
-                Width = 22,
-                MinWidth = 22
             };
 
             tbViewportScaling = new RibbonTextBox
@@ -703,16 +652,13 @@ namespace PrintWizard
             row2.Items.Add(tbAttrSheet);
 
             RibbonRowPanel row3 = new RibbonRowPanel();
-            //row3.Items.Add(labelFileName);
-            //row3.Items.Add(tbFileName);
-            //row3.Items.Add(btnChooseFilepath);
-            //row3.Items.Add(new RibbonRowBreak());
             row3.Items.Add(labelPlotterType);
             row3.Items.Add(comboPlotterType);
             row3.Items.Add(new RibbonRowBreak());
             row3.Items.Add(labelSheetSize);
             row3.Items.Add(comboSheetSize);
-
+            row3.Items.Add(new RibbonRowBreak());
+            row3.Items.Add(new RibbonLabel { Text = "", Height = 22 });
             RibbonRowPanel row01 = new RibbonRowPanel();
             row01.Items.Add(labelViewportScaling);
             row01.Items.Add(new RibbonRowBreak());
@@ -739,6 +685,7 @@ namespace PrintWizard
             panelSource.Items.Add(btnEraseLayouts);
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(row3);
+            
             panelSource.Items.Add(btnMultiPlot);
             panelSource.Items.Add(new RibbonPanelBreak());
             panelSource.Items.Add(row01);
