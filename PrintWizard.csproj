@@ -110,6 +110,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RegionPlot.cs" />
     <Compile Include="RibbonCommands.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -171,9 +172,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\icon_12.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\icon_13.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\icon_14.png" />

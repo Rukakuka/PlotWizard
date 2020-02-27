@@ -18,8 +18,10 @@ namespace PrintWizard
             {
                 BlockTable bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
                 PlotInfo pi = new PlotInfo();
-                PlotInfoValidator piv = new PlotInfoValidator();
-                piv.MediaMatchingPolicy = MatchingPolicy.MatchEnabled;
+                PlotInfoValidator piv = new PlotInfoValidator
+                {
+                    MediaMatchingPolicy = MatchingPolicy.MatchEnabled
+                };
                 // A PlotEngine does the actual plotting
                 // (can also create one for Preview)
                 if (PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting)
@@ -49,6 +51,7 @@ namespace PrintWizard
                             System.Windows.MessageBox.Show("\nНет листов для печати. Пропущено.\n");
                             return;
                         }
+                        
                         // Create a Progress Dialog to provide info
                         // and allow thej user to cancel
                         int sheetCount = 0;

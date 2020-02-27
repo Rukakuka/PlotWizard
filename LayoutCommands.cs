@@ -5,9 +5,9 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace PrintWizard
 {
-    public class LayoutCommands
+    internal class LayoutCommands
     {
-        public ObjectId CreateMyLayout(String pageSize, 
+        internal ObjectId CreateMyLayout(String pageSize, 
             double viewportScaling, 
             double contentScaling, 
             String styleSheet, 
@@ -25,7 +25,7 @@ namespace PrintWizard
             using (var tr = db.TransactionManager.StartTransaction())
             {
                 String layoutName = null;
-                layoutName = (plotObject.label + " Лист " + plotObject.sheet).Trim();
+                layoutName = (plotObject.Label + " Лист " + plotObject.Sheet).Trim();
 
                 layoutName = Extensions.PurgeString(layoutName);
 
@@ -64,7 +64,7 @@ namespace PrintWizard
                         // Adjust the view so that the model contents fit
                         if (ValidDbExtents(db.Extmin, db.Extmax))
                         {
-                            vp.FitContentToViewport(plotObject.extents, Extensions.Clamp(contentScaling, 0, (double)Int32.MaxValue));//(new Extents3d(db.Extmin, db.Extmax), 0.98);
+                            vp.FitContentToViewport(plotObject.Extents, Extensions.Clamp(contentScaling, 0, (double)Int32.MaxValue));//(new Extents3d(db.Extmin, db.Extmax), 0.98);
                         }
                         // Finally we lock the view to prevent meddling
                         vp.Locked = true;
@@ -93,7 +93,7 @@ namespace PrintWizard
               !(min.X > 0 && min.Y > 0 && min.Z > 0 &&
                 max.X < 0 && max.Y < 0 && max.Z < 0);
         }
-        public static bool CheckForDuplicates(string layoutName)
+        private static bool CheckForDuplicates(string layoutName)
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -116,7 +116,7 @@ namespace PrintWizard
             }
             return duplicate;
         }
-        public static void EraseAllLayouts()
+        internal static void EraseAllLayouts()
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)

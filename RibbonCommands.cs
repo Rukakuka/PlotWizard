@@ -16,7 +16,7 @@ using System.IO;
 
 namespace PrintWizard
 {
-    public class TextboxCommandHandler : System.Windows.Input.ICommand
+    internal class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
         public event EventHandler CanExecuteChanged;
@@ -33,13 +33,13 @@ namespace PrintWizard
                 switch (tb.Id)
                 {
                     case "tbBlockName":
-                        RibbonCommands.blockName = tb.TextValue;
+                        RibbonCommands.BlockName = tb.TextValue;
                         break;
                     case "tbAttrLabel":
-                        RibbonCommands.attrLabelName = tb.TextValue;
+                        RibbonCommands.AttrLabelName = tb.TextValue;
                         break;
                     case "tbAttrSheet":
-                        RibbonCommands.attrSheetName = tb.TextValue;
+                        RibbonCommands.AttrSheetName = tb.TextValue;
                         break;
                     case "tbViewportScaling":
                         try
@@ -47,12 +47,12 @@ namespace PrintWizard
                             double sc = double.Parse(tb.TextValue, CultureInfo.InvariantCulture);
                             sc = Extensions.Clamp(sc,0,1);
                             tb.TextValue = sc.ToString();
-                            RibbonCommands.viewportScaling = sc;
-                            PlotWizard.MyViewportScaling = RibbonCommands.viewportScaling;
+                            RibbonCommands.ViewportScaling = sc;
+                            PlotWizard.MyViewportScaling = RibbonCommands.ViewportScaling;
                         }
-                        catch (System.Exception e)
+                        catch (System.Exception) //Fromat, Argument, Overflow exceptions of Int32.Parse
                         {
-                            tb.TextValue = RibbonCommands.viewportScaling.ToString();
+                            tb.TextValue = RibbonCommands.ViewportScaling.ToString();
                         }
                         break;
                     case "tbContentScaling":
@@ -61,12 +61,12 @@ namespace PrintWizard
                             double sc = double.Parse(tb.TextValue, CultureInfo.InvariantCulture);
                             sc = Extensions.Clamp(sc, 0, (double)Int32.MaxValue);
                             tb.TextValue = sc.ToString();
-                            RibbonCommands.contentScaling = sc;
-                            PlotWizard.MyContentScaling = RibbonCommands.contentScaling;
+                            RibbonCommands.ContentScaling = sc;
+                            PlotWizard.MyContentScaling = RibbonCommands.ContentScaling;
                         }
-                        catch (System.Exception e)
+                        catch (System.Exception)
                         {
-                            tb.TextValue = RibbonCommands.contentScaling.ToString();
+                            tb.TextValue = RibbonCommands.ContentScaling.ToString();
                         }
                         break;
                 }
@@ -74,37 +74,11 @@ namespace PrintWizard
         }
     }
 
-    public class ButtonChooseFilepathCommandHandler : System.Windows.Input.ICommand
+    internal class ButtonCommandHandler : System.Windows.Input.ICommand
     {
+
         public event EventHandler CanExecuteChanged;
-#pragma warning restore 67
-        public bool CanExecute(object param)
-        {
-            return true;
-        }
-        public void Execute(object parameter)
-        {
-            var doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
 
-            var ed = doc.Editor;
-            
-            if (doc == null)
-                return;
-
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-
-            DialogResult result = folderBrowserDialog.ShowDialog();
-            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
-            {
-                System.Windows.Forms.MessageBox.Show(folderBrowserDialog.SelectedPath + "\\");
-            }
-        }
-    }
-    public class ButtonCommandHandler : System.Windows.Input.ICommand
-    {
-#pragma warning disable 67
-        public event EventHandler CanExecuteChanged;
-#pragma warning restore 67
         public bool CanExecute(object param)
         {
             return true;
@@ -123,7 +97,7 @@ namespace PrintWizard
         }
     }
 
-    public class ButtonChooseBlockCommandHandler : System.Windows.Input.ICommand
+    internal class ButtonChooseBlockCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
         public bool CanExecute(object param)
@@ -132,7 +106,7 @@ namespace PrintWizard
         }
         public void Execute(object parameter)
         {
-            if (parameter is RibbonCommandItem ribbonItem)
+            if (parameter is RibbonCommandItem)
             {
                 Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
                 if (doc == null || doc.IsDisposed)
@@ -164,7 +138,7 @@ namespace PrintWizard
                         BlockReference br = tr.GetObject(objId, Db.OpenMode.ForRead) as BlockReference;
                         ed.WriteMessage($"\nВыбран блок '{br.Name}'.\n");
 
-                        RibbonCommands.blockName = br.Name;
+                        RibbonCommands.BlockName = br.Name;
                         Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
 
                         foreach (var tab in ribbon.Tabs)
@@ -175,7 +149,7 @@ namespace PrintWizard
                                 var tb = tab.FindItem("tbBlockName") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
                                 {
-                                    tb.TextValue = RibbonCommands.blockName;
+                                    tb.TextValue = RibbonCommands.BlockName;
                                 }
 
                                 List<string> attrCollection = new List<string>();
@@ -190,21 +164,21 @@ namespace PrintWizard
                                 AttributesSelector attrSelector = new AttributesSelector(attrCollection);
                                 attrSelector.ShowDialog();
 
-                                RibbonCommands.attrLabelName = AttributesSelector._attrLabel;
-                                RibbonCommands.attrSheetName = AttributesSelector._attrSheet;
+                                RibbonCommands.AttrLabelName = AttributesSelector._attrLabel;
+                                RibbonCommands.AttrSheetName = AttributesSelector._attrSheet;
 
                                 tb = tab.FindItem("tbAttrLabel") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
-                                    tb.TextValue = RibbonCommands.attrLabelName;
+                                    tb.TextValue = RibbonCommands.AttrLabelName;
                                 tb = tab.FindItem("tbAttrSheet") as RibbonTextBox;
                                 if (tb is RibbonTextBox)
-                                    tb.TextValue = RibbonCommands.attrSheetName;
+                                    tb.TextValue = RibbonCommands.AttrSheetName;
                                 break;
                             }
                         }
-                        PlotWizard.MyBlock_Name = RibbonCommands.blockName;
-                        PlotWizard.MyBlockAttr_Label = RibbonCommands.attrLabelName;
-                        PlotWizard.MyBLockAttr_Sheet = RibbonCommands.attrSheetName;
+                        PlotWizard.MyBlockName = RibbonCommands.BlockName;
+                        PlotWizard.MyBlockAttrLabel = RibbonCommands.AttrLabelName;
+                        PlotWizard.MyBLockAttrSheet = RibbonCommands.AttrSheetName;
                         tr.Commit();
                     }
                 }
@@ -212,8 +186,8 @@ namespace PrintWizard
         }
         private partial class AttributesSelector : Form
         {
-            public static string _attrLabel;
-            public static string _attrSheet;
+            internal static string _attrLabel;
+            internal static string _attrSheet;
             private static List<string> _attrCollection = new List<string>();
             public AttributesSelector(List<string> attrCollection)
             {
@@ -277,9 +251,9 @@ namespace PrintWizard
                     Text = "OK"
                 };
 
-                lbAttributesLabel.SelectedIndexChanged += new System.EventHandler(lbAttributesLabel_SelectedIndexChanged);
-                lbAttributesSheet.SelectedIndexChanged += new System.EventHandler(lbAttributesSheet_SelectedIndexChanged);
-                buttonOk.Click += new System.EventHandler(buttonOk_Click);
+                lbAttributesLabel.SelectedIndexChanged += new System.EventHandler(ListboxAttributesLabel_SelectedIndexChanged);
+                lbAttributesSheet.SelectedIndexChanged += new System.EventHandler(ListboxAttributesSheet_SelectedIndexChanged);
+                buttonOk.Click += new System.EventHandler(ButtonOk_Click);
 
                 AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
                 ClientSize = new System.Drawing.Size(310, 320);
@@ -295,15 +269,15 @@ namespace PrintWizard
     
                 PerformLayout();    
             }
-            private void buttonOk_Click(object sender, EventArgs e)
+            private void ButtonOk_Click(object sender, EventArgs e)
             {
                 if (!String.IsNullOrEmpty(_attrLabel))
-                    PlotWizard.MyBlockAttr_Label = _attrLabel;
+                    PlotWizard.MyBlockAttrLabel = _attrLabel;
                 if (!String.IsNullOrEmpty(_attrSheet))
-                    PlotWizard.MyBLockAttr_Sheet = _attrSheet;
+                    PlotWizard.MyBLockAttrSheet = _attrSheet;
                 Close();
             }
-            private void lbAttributesLabel_SelectedIndexChanged(object sender, EventArgs e)
+            private void ListboxAttributesLabel_SelectedIndexChanged(object sender, EventArgs e)
             {
                 if (!this.lbAttributesLabel.Text.Equals("Нет"))
                 {
@@ -314,7 +288,7 @@ namespace PrintWizard
                     _attrLabel = " ";
                 }
             }
-            private void lbAttributesSheet_SelectedIndexChanged(object sender, EventArgs e)
+            private void ListboxAttributesSheet_SelectedIndexChanged(object sender, EventArgs e)
             {
                 if (!this.lbAttributesSheet.Text.Equals("Нет"))
                 {
@@ -327,14 +301,13 @@ namespace PrintWizard
             }
         }
     }
-    public class RibbonCommands : IExtensionApplication
+    internal class RibbonCommands : IExtensionApplication
     {
-        public static string blockName;
-        public static string attrLabelName;
-        public static string attrSheetName;
-        public static double viewportScaling;
-        public static double contentScaling;
-        public static string fileName;
+        public static string BlockName { get; set; }
+        public static string AttrLabelName { get; set; }
+        public static string AttrSheetName { get; set; }
+        public static double ViewportScaling { get; set; }
+        public static double ContentScaling { get; set; }
 
         private Autodesk.Windows.RibbonTextBox tbViewportScaling;
         private Autodesk.Windows.RibbonTextBox tbContentScaling;
@@ -351,7 +324,7 @@ namespace PrintWizard
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
         public void Terminate() { }
-        private void comboPlotterType_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
+        private void ComboPlotterType_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
         {
             if (args.NewValue != null)
             {
@@ -378,7 +351,7 @@ namespace PrintWizard
                 }
             }
         }
-        private void comboSheetSize_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
+        private void ComboSheetSize_SelectedIndexChanged(object o, RibbonPropertyChangedEventArgs args)
         {
             if (args.NewValue != null)
             {
@@ -561,7 +534,7 @@ namespace PrintWizard
                     comboPlotterType.Current = btn;
                 }
             }            
-            comboPlotterType.CurrentChanged += comboPlotterType_SelectedIndexChanged;
+            comboPlotterType.CurrentChanged += ComboPlotterType_SelectedIndexChanged;
 
             comboSheetSize = new RibbonCombo
             {
@@ -585,7 +558,7 @@ namespace PrintWizard
                     comboSheetSize.Current = btn;
                 }
             }            
-            comboSheetSize.CurrentChanged += comboSheetSize_SelectedIndexChanged;
+            comboSheetSize.CurrentChanged += ComboSheetSize_SelectedIndexChanged;
 
             btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
