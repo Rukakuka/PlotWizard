@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace PrintWizard
 {
-    public static class Extensions
+    internal static class Extensions
     {
         /// <summary>
         /// Reverses the order of the X and Y properties of a Point2d.
@@ -64,8 +64,7 @@ namespace PrintWizard
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception e)
                 {
-                    Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-                    Editor ed = doc.Editor;
+                    //Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
                     System.Windows.MessageBox.Show("From @CreateAndMakeLayoutCurrent\n" + e.ToString());
                 }
             }
@@ -236,7 +235,7 @@ namespace PrintWizard
         }
         public static Dictionary<string, string> GetMediaNameList()
         {
-            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+            //Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
             Dictionary<string, string> media = new Dictionary<string, string>();
             try
             {
@@ -252,9 +251,10 @@ namespace PrintWizard
                     }
                 }
             }
-            catch (System.Exception ex)
+            catch (System.Exception e)
             {
-                ed.WriteMessage("\nCurrent Plotter not set...");
+                System.Windows.MessageBox.Show("Extensions::GetMediaNameList() Exception thrown:\n" +
+                    e.ToString());
             }
             return media;
         }

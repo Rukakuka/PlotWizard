@@ -79,19 +79,19 @@ namespace PrintWizard
             if (regionId.ObjectClass.Name != "AcDbRegion")
                 throw new ArgumentException("regionId.ObjectClass.Name != AcDbRegion");
             if (pcsFileName == null)
-                throw new ArgumentNullException("pcsFileName");
-            if (pcsFileName.Trim() == String.Empty)
+                throw new ArgumentNullException(nameof(pcsFileName));
+            if (String.IsNullOrEmpty(pcsFileName.Trim()))
                 throw new ArgumentException("pcsFileName.Trim() == String.Empty");
             if (mediaName == null)
-                throw new ArgumentNullException("mediaName");
-            if (mediaName.Trim() == String.Empty)
+                throw new ArgumentNullException(nameof(mediaName));
+            if (String.IsNullOrEmpty(mediaName.Trim()))
                 throw new ArgumentException("mediaName.Trim() == String.Empty");
             if (outputFileName == null)
-                throw new ArgumentNullException("outputFileName");
+                throw new ArgumentNullException(nameof(outputFileName));
             if (outputFileName.Trim() == String.Empty)
                 throw new ArgumentException("outputFileName.Trim() == String.Empty");
             Db.Database previewDb = Hs.WorkingDatabase;
-            Db.Database db = null;
+            Db.Database db;
             Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 return;
@@ -142,9 +142,9 @@ namespace PrintWizard
                                   5003, 2));
                                 double[] firres = new double[] { 0, 0, 0 };
                                 double[] secres = new double[] { 0, 0, 0 };
-                                UnmanagedApi.AcedTrans(bottomLeft_3d.ToArray(), rbFrom.UnmanagedObject,
+                                _ = UnmanagedApi.AcedTrans(bottomLeft_3d.ToArray(), rbFrom.UnmanagedObject,
                                   rbTo.UnmanagedObject, 0, firres);
-                                UnmanagedApi.AcedTrans(topRight_3d.ToArray(), rbFrom.UnmanagedObject,
+                                _ = UnmanagedApi.AcedTrans(topRight_3d.ToArray(), rbFrom.UnmanagedObject,
                                   rbTo.UnmanagedObject, 0, secres);
                                 Db.Extents2d extents = new Db.Extents2d(
                                     firres[0],
@@ -165,8 +165,10 @@ namespace PrintWizard
                                 // We need to link the PlotInfo to the
                                 // PlotSettings and then validate it
                                 pi.OverrideSettings = ps;
-                                Pt.PlotInfoValidator piv = new Pt.PlotInfoValidator();
-                                piv.MediaMatchingPolicy = Pt.MatchingPolicy.MatchEnabled;
+                                Pt.PlotInfoValidator piv = new Pt.PlotInfoValidator
+                                {
+                                    MediaMatchingPolicy = Pt.MatchingPolicy.MatchEnabled
+                                };
                                 piv.Validate(pi);
                                 // A PlotEngine does the actual plotting
                                 // (can also create one for Preview)
