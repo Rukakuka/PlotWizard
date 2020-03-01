@@ -12,12 +12,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Ap = Autodesk.AutoCAD.ApplicationServices;
-using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
-using Gm = Autodesk.AutoCAD.Geometry;
-using Us = Autodesk.AutoCAD.DatabaseServices.SymbolUtilityServices;
-using Pt = Autodesk.AutoCAD.PlottingServices;
 
 [assembly: Rt.CommandClass(typeof(PrintWizard.PlotWizard))]
 

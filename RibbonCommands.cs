@@ -16,6 +16,13 @@ using System.IO;
 
 namespace PrintWizard
 {
+    class A
+    {
+        public int Number {
+            get { return Number; }
+            set { Number = value; System.Console.WriteLine(""); }
+        }
+    }
     internal class TextboxCommandHandler : System.Windows.Input.ICommand
     {
 #pragma warning disable 67
@@ -314,8 +321,10 @@ namespace PrintWizard
         private Autodesk.Windows.RibbonTextBox tbBlockName;
         private Autodesk.Windows.RibbonTextBox tbAttrLabel;
         private Autodesk.Windows.RibbonTextBox tbAttrSheet;
+
         private Autodesk.Windows.RibbonCombo comboPlotterType;
         private Autodesk.Windows.RibbonCombo comboSheetSize;
+
         private Autodesk.Windows.RibbonButton btnChooseBlock;
         private Autodesk.Windows.RibbonButton btnCreateLayouts;
         private Autodesk.Windows.RibbonButton btnEraseLayouts;
@@ -333,6 +342,7 @@ namespace PrintWizard
                 PlotWizard.MyPlotter = (args.NewValue as RibbonButton).Text;
 
                 comboSheetSize.Items.Clear();
+
                 bool select = true;
                 foreach (var sheetSize in Extensions.GetMediaNameList())
                 {
@@ -342,6 +352,7 @@ namespace PrintWizard
                         ShowText = true
                     };
                     comboSheetSize.Items.Add(btn);
+                    
                     // select first sheetSize in list
                     if (select)
                     {
