@@ -112,7 +112,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RegionPlot.cs" />
-    <Compile Include="RibbonCommands.cs" />
+    <Compile Include="Ribbon\AttributeSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ribbon\AttributeSelector.Designer.cs">
+      <DependentUpon>AttributeSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ribbon\CommandHandlers\ButtonChooseBlockCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\ButtonCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\TextboxCommandHandler.cs" />
+    <Compile Include="Ribbon\RibbonCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="PresentationMgrLib">
@@ -130,6 +139,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ribbon\AttributeSelector.resx">
+      <DependentUpon>AttributeSelector.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

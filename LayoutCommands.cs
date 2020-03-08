@@ -24,10 +24,8 @@ namespace PrintWizard
 
             using (var tr = db.TransactionManager.StartTransaction())
             {
-                String layoutName = null;
-                layoutName = (plotObject.Label + " Лист " + plotObject.Sheet).Trim();
-
-                layoutName = Extensions.PurgeString(layoutName);
+                String layoutName = plotObject.Label + " Лист " + plotObject.Sheet;
+                layoutName = Extensions.PurgeString(layoutName.Trim());
 
                 if (String.IsNullOrEmpty(layoutName))
                 {
@@ -97,24 +95,19 @@ namespace PrintWizard
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
-            bool duplicate = false;
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
+                DBDictionary laytDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
                 
                 // Iterate dictionary entries.
-                foreach (DBDictionaryEntry de in layoutDict)
+                foreach (DBDictionaryEntry layName in laytDict)
                 {
-                    string name = de.Key;
-                    if (name.Equals(layoutName))
-                    {
-                        duplicate = true;
-                        break;
-                    }
+                    if (layName.Key.Equals(layoutName))
+                        return true;
                 }
                 tr.Commit();
             }
-            return duplicate;
+            return false;
         }
         internal static void EraseAllLayouts()
         {

@@ -46,10 +46,6 @@ namespace PrintWizard
         /// <param name="name">The name of the viewport.</param>
         /// <param name="select">Whether to select it.</param>
         /// <returns>The ObjectId of the newly created viewport.</returns>
-        public static Extents2d Strip(this Extents3d ex)
-        {
-            return new Extents2d(ex.MinPoint.X, ex.MinPoint.Y, ex.MaxPoint.X, ex.MaxPoint.Y);
-        }
         public static ObjectId CreateAndMakeLayoutCurrent( this LayoutManager lm, string name, bool select = true)
         {
             // First try to get the layout
@@ -265,13 +261,8 @@ namespace PrintWizard
             using (PlotSettings plSet = new PlotSettings(true))
             {
                 PlotSettingsValidator acPlSetVdr = PlotSettingsValidator.Current;
-
-                int cnt = 0;
-
                 foreach (string plotterName in acPlSetVdr.GetPlotDeviceList())
-                {
                     pl.Add(plotterName);
-                }
             }
             return pl;
         }
@@ -298,9 +289,7 @@ namespace PrintWizard
                 List<String> forbiddenSymbols = new List<String> {"\\", "<" , ">", "/", ",", "`",
                                                               "?", ":", ";", "*", "|", "="};
                 foreach (var forbiddenSymbol in forbiddenSymbols)
-                {
                     str = str.Replace(forbiddenSymbol, " ");
-                }
             }
             return str;
         }

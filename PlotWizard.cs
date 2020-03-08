@@ -71,9 +71,7 @@ namespace PrintWizard
                 {
                     ObjectId lay = lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
                     if (!lay.IsNull)
-                    {
                         Layouts.Add(lay);
-                    }
                 }
                 ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
             }
