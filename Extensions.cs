@@ -9,7 +9,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     internal static class Extensions
     {

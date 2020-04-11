@@ -7,7 +7,7 @@ using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 
-namespace PrintWizard
+namespace PlotWizard
 {
 
     internal class ButtonChoosePlotObjCommandHandler : System.Windows.Input.ICommand

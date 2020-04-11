@@ -1,4 +1,4 @@
-﻿namespace PrintWizard.Ribbon
+﻿namespace PlotWizard.Ribbon
 {
     partial class AttributeSelector
     {

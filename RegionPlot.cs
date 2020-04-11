@@ -10,7 +10,7 @@ using Us = Autodesk.AutoCAD.DatabaseServices.SymbolUtilityServices;
 using Br = Autodesk.AutoCAD.BoundaryRepresentation;
 using Pt = Autodesk.AutoCAD.PlottingServices;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     public static class RegionPlot
     {

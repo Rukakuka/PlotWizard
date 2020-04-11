@@ -11,9 +11,9 @@ using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 
-[assembly: Rt.CommandClass(typeof(PrintWizard.PlotWizard))]
+[assembly: Rt.CommandClass(typeof(PlotWizard.PlotWizard))]
 
-namespace PrintWizard
+namespace PlotWizard
 {
     internal class PlotObject
     {
@@ -86,8 +86,9 @@ namespace PrintWizard
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Title = "Вывод в файл",
-                Filter =  $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
-                            $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}"
+                Filter = $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
+                            $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}",
+                FileName = GetInitialFilename(Layouts)
             };
             bool? result = saveFileDialog.ShowDialog();
 
@@ -96,6 +97,7 @@ namespace PrintWizard
                 doc.Editor.WriteMessage("\nОтмена.\n");
                 return;
             }
+
             MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, saveFileDialog.FileName, Layouts);
         }
 
@@ -104,6 +106,22 @@ namespace PrintWizard
         {
             LayoutCommands.EraseAllLayouts();
             Layouts.Clear();
+        }
+        private static string GetInitialFilename(ObjectIdCollection layouts)
+        {
+            string filename = "";
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+            Transaction tr = db.TransactionManager.StartTransaction();
+
+            if (layouts != null && !layouts.IsDisposed)
+            { 
+                Layout layout = new Layout();
+                layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
+                filename = layout.LayoutName;
+            }
+            tr.Commit();
+            return filename;
         }
 
         private static void AddMyRibbonPanel()

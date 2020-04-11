@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     internal class TextboxCommandHandler : System.Windows.Input.ICommand
     {

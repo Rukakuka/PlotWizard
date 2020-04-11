@@ -2,7 +2,7 @@
 using Autodesk.Windows;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     internal class ButtonCommandHandler : System.Windows.Input.ICommand
     {

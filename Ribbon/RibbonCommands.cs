@@ -9,11 +9,12 @@ using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Db = Autodesk.AutoCAD.DatabaseServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     internal class RibbonCommands : IExtensionApplication
     {
         public const string TargetTab = "Вывод";
+        private const string Title = "Печать блоков";
         public static string BlockName { get; set; }
         public static string AttrLabelName { get; set; }
         public static string AttrSheetName { get; set; }
@@ -75,6 +76,22 @@ namespace PrintWizard
         }        
         public void AddMyRibbonPanel()
         {
+            Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
+            foreach (var tab in ribbon.Tabs)
+            {
+                if (tab.Title.Equals("Вывод", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foreach (var panel in tab.Panels)
+                    {
+                        if (panel.Source.Title.Equals(Title, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            System.Windows.MessageBox.Show("Вкладка уже добавлена");
+                            return;
+                        }
+                    }
+                }
+            }
+            
             Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(PlotWizard.MyPlotter);
 
             RibbonLabel labelBlockName = new RibbonLabel
@@ -379,7 +396,6 @@ namespace PrintWizard
             panelSource.Items.Add(row01);
             panelSource.Items.Add(row02);
 
-            Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)
             {
                 if (tab.Title.Equals("Вывод")) 
@@ -389,7 +405,6 @@ namespace PrintWizard
                     break;
                 }
             }
-
         }
     }
 }

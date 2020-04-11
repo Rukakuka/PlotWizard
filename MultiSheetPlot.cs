@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.PlottingServices;
 
-namespace PrintWizard
+namespace PlotWizard
 {
     public static class MultiSheetPlot
     {
