@@ -1,9 +1,4 @@
-﻿// ============================================================================
-// PlotRegionToPDF.cs
-// © Andrey Bushman, 2014
-// ============================================================================
-// The PLOTREGION command plot a Region object to PDF.
-// ============================================================================
+﻿
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

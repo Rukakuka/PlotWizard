@@ -111,7 +111,7 @@ namespace PrintWizard
         }
         internal static void EraseAllLayouts()
         {
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 return;
 
@@ -120,12 +120,12 @@ namespace PrintWizard
 
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                DBDictionary layoutDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
+                DBDictionary layoutDictionary = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
 
                 // Iterate dictionary entries.
-                foreach (DBDictionaryEntry de in layoutDict)
+                foreach (DBDictionaryEntry layout in layoutDictionary)
                 {
-                    string layoutName = de.Key;
+                    string layoutName = layout.Key;
                     if (layoutName != "Model" && layoutName != "Лист1")
                     {
                         try

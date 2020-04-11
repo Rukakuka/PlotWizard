@@ -8,172 +8,148 @@ namespace PrintWizard
 {
     public static class MultiSheetPlot
     {
-        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName, ObjectIdCollection layouts)
+        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName, ObjectIdCollection layoutsToPlot)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
             Database db = doc.Database;
             Transaction tr = db.TransactionManager.StartTransaction();
-            using (tr)
+
+            PlotInfo plotInfo = new PlotInfo();
+            PlotInfoValidator plotInfoValidator = new PlotInfoValidator
             {
-                BlockTable bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
-                PlotInfo pi = new PlotInfo();
-                PlotInfoValidator piv = new PlotInfoValidator
-                {
-                    MediaMatchingPolicy = MatchingPolicy.MatchEnabled
-                };
-                // A PlotEngine does the actual plotting
-                // (can also create one for Preview)
-                if (PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting)
-                {
-                    PlotEngine pe = PlotFactory.CreatePublishEngine();
-                    using (pe)
-                    {
-                        // Collect all the paperspace layouts
-                        // for plotting
-                        //ObjectIdCollection layoutsToPlot = new ObjectIdCollection();
-                        //foreach (ObjectId btrId in bt)
-                        //{
-                        //    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-                        //    if (btr.IsLayout &&
-                        //        btr.Name.ToUpper() != BlockTableRecord.ModelSpace.ToUpper())
-                        //    {
-                        //        layoutsToPlot.Add(btrId);
-                        //    }
-                        //}
+                MediaMatchingPolicy = MatchingPolicy.MatchEnabled
+            };
 
-                        if (layouts == null)
-                            return;
-                        if (layouts.IsDisposed)
-                            return;
-                        if (layouts.Count == 0)
-                        {
-                            System.Windows.MessageBox.Show("\nНет листов для печати. Пропущено.\n");
-                            return;
-                        }
-                        
-                        // Create a Progress Dialog to provide info
-                        // and allow thej user to cancel
-                        int sheetCount = 0;
-                        foreach (ObjectId btrId in layouts)
-                        {
-                            try { 
-                                _ = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
-                            }
-                            catch (Exception e) { // catch erased layout or whatever shit
-                                layouts.RemoveAt(sheetCount);
-                                char[] r  = { '(', ')' };
-                                ed.WriteMessage($"\nЛист c id '{btrId.ToString().Trim(r)}' удалён или создан с ошибками. Пропущено.\n");
-                            }
-                            sheetCount++;
-                        }
-
-                        PlotProgressDialog ppd = new PlotProgressDialog(false, sheetCount, true);
-                        using (ppd)
-                        {
-                            int numSheet = 1;
-                            foreach (ObjectId btrId in layouts)
-                            {
-                                //-------------------------------------------------->BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-                                Layout lo = new Layout();
-                                try
-                                {
-                                    lo = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
-                                }
-                                catch (Exception e)
-                                {
-                                    continue;
-                                }
-                                // We need a PlotSettings object
-                                // based on the layout settings
-                                // which we then customize
-                                PlotSettings ps = new PlotSettings(lo.ModelType);
-                                ps.CopyFrom(lo);
-                                // The PlotSettingsValidator helps
-                                // create a valid PlotSettings object
-                                PlotSettingsValidator psv = PlotSettingsValidator.Current;
-                                // We'll plot the extents, centered and
-                                // scaled to fit
-                                psv.SetPlotType(ps, Autodesk.AutoCAD.DatabaseServices.PlotType.Extents);
-                                psv.SetUseStandardScale(ps, true);
-                                psv.SetStdScaleType(ps, StdScaleType.ScaleToFit);
-                                psv.SetPlotCentered(ps, true);
-                                // We'll use the standard DWFx PC3, as
-                                // this supports multiple sheets
-                                psv.SetPlotConfigurationName(ps, plotter, pageSize);
-                                // We need a PlotInfo object
-                                // linked to the layout
-                                pi.Layout = btrId;                         //---------------------------> btr.LayoutId;
-                                // Make the layout we're plotting current
-                                LayoutManager.Current.CurrentLayout = lo.LayoutName;
-                                // We need to link the PlotInfo to the
-                                // PlotSettings and then validate it
-                                pi.OverrideSettings = ps;
-                                piv.Validate(pi);
-                                if (numSheet == 1)
-                                {
-                                    ppd.set_PlotMsgString(PlotMessageIndex.DialogTitle, "Custom Plot Progress");
-                                    ppd.set_PlotMsgString(PlotMessageIndex.CancelJobButtonMessage, "Cancel Job");
-                                    ppd.set_PlotMsgString(PlotMessageIndex.CancelSheetButtonMessage, "Cancel Sheet");
-                                    ppd.set_PlotMsgString(PlotMessageIndex.SheetSetProgressCaption, "Sheet Set Progress");
-                                    ppd.set_PlotMsgString(PlotMessageIndex.SheetProgressCaption, "Sheet Progress");
-                                    ppd.LowerPlotProgressRange = 0;
-                                    ppd.UpperPlotProgressRange = 100;
-                                    ppd.PlotProgressPos = 0;
-                                    // Let's start the plot, at last
-                                    ppd.OnBeginPlot();
-                                    ppd.IsVisible = true;
-                                    pe.BeginPlot(ppd, null);
-                                    // We'll be plotting a single document
-
-                                    pe.BeginDocument(
-                                      pi,
-                                      doc.Name,
-                                      null,
-                                      1,
-                                      true, // Let's plot to file
-                                      outputFileName
-                                    );
-                                }
-                                // Which may contain multiple sheets
-                                ppd.StatusMsgString = "Plotting " + doc.Name.Substring( doc.Name.LastIndexOf("\\") + 1) + " - sheet " + numSheet.ToString() + " of " + layouts.Count.ToString();
-                                ppd.OnBeginSheet();
-                                ppd.LowerSheetProgressRange = 0;
-                                ppd.UpperSheetProgressRange = 100;
-                                ppd.SheetProgressPos = 0;
-                                PlotPageInfo ppi = new PlotPageInfo();
-                                pe.BeginPage(
-                                  ppi,
-                                  pi,
-                                  (numSheet == layouts.Count),
-                                  null
-                                );
-                                pe.BeginGenerateGraphics(null);
-                                ppd.SheetProgressPos = 50;
-                                pe.EndGenerateGraphics(null);
-                                // Finish the sheet
-                                pe.EndPage(null);
-                                ppd.SheetProgressPos = 100;
-                                ppd.OnEndSheet();
-                                numSheet++;
-                                ppd.PlotProgressPos = (int)(((double)numSheet*100)/((double)layouts.Count));
-                            }
-                            // Finish the document
-                            pe.EndDocument(null);
-                            // And finish the plot
-                            ppd.PlotProgressPos = 100;
-                            ppd.OnEndPlot();
-                            pe.EndPlot(null);
-                        }
-                    }
-                }
-                else
-                {
-                    ed.WriteMessage("\nОтмена. Принтер занят (другая печать в процессе).\n");
-                }
+            if (PlotFactory.ProcessPlotState != ProcessPlotState.NotPlotting)
+            {
+                ed.WriteMessage("\nОтмена. Принтер занят (другая печать в процессе).\n");
                 tr.Commit();
-                ed.WriteMessage($"\nПечать завершена. \n");
             }
+
+            PlotEngine plotEngine = PlotFactory.CreatePublishEngine();
+
+            // Collect all the paperspace layouts
+            // for plotting
+            //ObjectIdCollection layoutsToPlot = new ObjectIdCollection();
+            //foreach (ObjectId btrId in bt)
+            //{
+            //    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
+            //    if (btr.IsLayout &&
+            //        btr.Name.ToUpper() != BlockTableRecord.ModelSpace.ToUpper())
+            //    {
+            //        layoutsToPlot.Add(btrId);
+            //    }
+            //}
+
+            if (layoutsToPlot == null || layoutsToPlot.IsDisposed)
+            {
+                System.Windows.MessageBox.Show("\nОбъект печати пуст Пропущено.\n");
+                tr.Commit();
+                return;
+            }
+            if (layoutsToPlot.Count == 0)
+            {
+                System.Windows.MessageBox.Show("\nКоличество листов для печати равно нулю. Пропущено.\n");
+                tr.Commit();
+                return;
+            }
+
+            int sheetCount = 0;
+            foreach (ObjectId btrId in layoutsToPlot)
+            {
+                try
+                {
+                    _ = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
+                }
+                catch (Exception e)
+                { // catch erased layout or whatever shit
+                    layoutsToPlot.RemoveAt(sheetCount);
+                    char[] r = { '(', ')' };
+                    ed.WriteMessage($"\nЛист c id '{btrId.ToString().Trim(r)}' удалён или создан с ошибками. Удалено из очереди печати.\n");
+                }
+                sheetCount++;
+            }
+
+            PlotProgressDialog plotProcessDialog = new PlotProgressDialog(false, sheetCount, true);
+
+            int numSheet = 1;
+            foreach (ObjectId btrId in layoutsToPlot)
+            {
+                Layout layout = new Layout();
+                try
+                {
+                    layout = tr.GetObject(btrId, OpenMode.ForRead) as Layout;
+                }
+                catch (Exception e)
+                {
+                    ed.WriteMessage($"\nЛист c id '{btrId.ToString()}' отсуствует в базе данных чертежа. Выполнен переход к следующему листу в очереди.\n");
+                    continue;
+                }
+
+                PlotSettings plotSettings = new PlotSettings(layout.ModelType);
+                plotSettings.CopyFrom(layout);
+
+                PlotSettingsValidator plotSettingsValidator = PlotSettingsValidator.Current;
+
+                plotSettingsValidator.SetPlotType(plotSettings, Autodesk.AutoCAD.DatabaseServices.PlotType.Extents);
+                plotSettingsValidator.SetUseStandardScale(plotSettings, true);
+                plotSettingsValidator.SetStdScaleType(plotSettings, StdScaleType.ScaleToFit);
+                plotSettingsValidator.SetPlotCentered(plotSettings, true);
+
+                plotSettingsValidator.SetPlotConfigurationName(plotSettings, plotter, pageSize);
+
+                plotInfo.Layout = btrId;                         
+
+                LayoutManager.Current.CurrentLayout = layout.LayoutName;
+
+                plotInfo.OverrideSettings = plotSettings;
+                plotInfoValidator.Validate(plotInfo);
+                if (numSheet == 1)
+                {
+                    plotProcessDialog.set_PlotMsgString(PlotMessageIndex.DialogTitle, "Custom Plot Progress");
+                    plotProcessDialog.set_PlotMsgString(PlotMessageIndex.CancelJobButtonMessage, "Cancel Job");
+                    plotProcessDialog.set_PlotMsgString(PlotMessageIndex.CancelSheetButtonMessage, "Cancel Sheet");
+                    plotProcessDialog.set_PlotMsgString(PlotMessageIndex.SheetSetProgressCaption, "Sheet Set Progress");
+                    plotProcessDialog.set_PlotMsgString(PlotMessageIndex.SheetProgressCaption, "Sheet Progress");
+                    plotProcessDialog.LowerPlotProgressRange = 0;
+                    plotProcessDialog.UpperPlotProgressRange = 100;
+                    plotProcessDialog.PlotProgressPos = 0;
+
+                    plotProcessDialog.OnBeginPlot();
+                    plotProcessDialog.IsVisible = true;
+                    plotEngine.BeginPlot(plotProcessDialog, null);
+
+                    plotEngine.BeginDocument(plotInfo, doc.Name, null, 1, true, outputFileName);
+                }
+
+                plotProcessDialog.StatusMsgString = "Plotting " + doc.Name.Substring(doc.Name.LastIndexOf("\\") + 1) + " - sheet " + numSheet.ToString() + " of " + layoutsToPlot.Count.ToString();
+                plotProcessDialog.OnBeginSheet();
+                plotProcessDialog.LowerSheetProgressRange = 0;
+                plotProcessDialog.UpperSheetProgressRange = 100;
+                plotProcessDialog.SheetProgressPos = 0;
+
+                PlotPageInfo plotPageInfo = new PlotPageInfo();
+                plotEngine.BeginPage(plotPageInfo, plotInfo, (numSheet == layoutsToPlot.Count), null);
+
+                plotEngine.BeginGenerateGraphics(null);
+                plotProcessDialog.SheetProgressPos = 50;
+                plotEngine.EndGenerateGraphics(null);
+                plotEngine.EndPage(null);
+                plotProcessDialog.SheetProgressPos = 100;
+                plotProcessDialog.OnEndSheet();
+                numSheet++;
+
+                plotProcessDialog.PlotProgressPos = (int)Math.Floor((double)numSheet * 100 / layoutsToPlot.Count);
+            }
+            plotEngine.EndDocument(null);
+            plotProcessDialog.PlotProgressPos = 100;
+            plotProcessDialog.OnEndPlot();
+            plotEngine.EndPlot(null);
+
+            tr.Commit();
+            ed.WriteMessage($"\nПечать завершена. \n");
         }
     }
 }
+

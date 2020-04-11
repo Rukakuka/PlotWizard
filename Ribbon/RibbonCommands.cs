@@ -20,19 +20,19 @@ namespace PrintWizard
         public static double ViewportScaling { get; set; }
         public static double ContentScaling { get; set; }
 
-        private Autodesk.Windows.RibbonTextBox tbViewportScaling;
-        private Autodesk.Windows.RibbonTextBox tbContentScaling;
-        private Autodesk.Windows.RibbonTextBox tbBlockName;
-        private Autodesk.Windows.RibbonTextBox tbAttrLabel;
-        private Autodesk.Windows.RibbonTextBox tbAttrSheet;
+        private RibbonTextBox tbViewportScaling;
+        private RibbonTextBox tbContentScaling;
+        private RibbonTextBox tbBlockName;
+        private RibbonTextBox tbAttrLabel;
+        private RibbonTextBox tbAttrSheet;
 
-        private Autodesk.Windows.RibbonCombo comboPlotterType;
-        private Autodesk.Windows.RibbonCombo comboSheetSize;
+        private RibbonCombo comboPlotterType;
+        private RibbonCombo comboSheetSize;
 
-        private Autodesk.Windows.RibbonButton btnChooseBlock;
-        private Autodesk.Windows.RibbonButton btnCreateLayouts;
-        private Autodesk.Windows.RibbonButton btnEraseLayouts;
-        private Autodesk.Windows.RibbonButton btnMultiPlot;
+        private RibbonButton btnChooseBlock;
+        private RibbonButton btnCreateLayouts;
+        private RibbonButton btnEraseLayouts;
+        private RibbonButton btnMultiPlot;
 
         // Функции Initialize() и Terminate() необходимы, чтобы реализовать интерфейс IExtensionApplication
         public void Initialize() { }
