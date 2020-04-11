@@ -117,7 +117,7 @@
     <Compile Include="Ribbon\AttributeSelector.Designer.cs">
       <DependentUpon>AttributeSelector.cs</DependentUpon>
     </Compile>
-    <Compile Include="Ribbon\CommandHandlers\ButtonChooseBlockCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\ButtonChoosePlotObjCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\ButtonCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\TextboxCommandHandler.cs" />
     <Compile Include="Ribbon\RibbonCommands.cs" />

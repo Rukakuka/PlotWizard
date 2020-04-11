@@ -277,7 +277,7 @@ namespace PrintWizard
 
             btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
-                CommandHandler = new ButtonChooseBlockCommandHandler(),
+                CommandHandler = new ButtonChoosePlotObjCommandHandler(),
                 Text = "Выбрать\nблок",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_12),
@@ -391,6 +391,5 @@ namespace PrintWizard
             }
 
         }
-
     }
 }

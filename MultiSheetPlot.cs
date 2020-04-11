@@ -147,7 +147,10 @@ namespace PrintWizard
             plotProcessDialog.OnEndPlot();
             plotEngine.EndPlot(null);
 
+            plotProcessDialog.Dispose();
+            plotEngine.Dispose();
             tr.Commit();
+
             ed.WriteMessage($"\nПечать завершена. \n");
         }
     }

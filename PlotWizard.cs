@@ -9,6 +9,7 @@ using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
 
 [assembly: Rt.CommandClass(typeof(PrintWizard.PlotWizard))]
 
@@ -28,6 +29,8 @@ namespace PrintWizard
     public static class PlotWizard
     {        
         public static string MyBlockName { get; set; }
+        public static Point3d MyFrameMaxPoint { get; set; }
+        public static Point3d MyFrameMinPoint { get; set; }
         public static string MyBlockAttrLabel { get; set; }
         public static string MyBLockAttrSheet { get; set; }
         public static double MyViewportScaling { get; set; }
@@ -58,7 +61,7 @@ namespace PrintWizard
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(MyBlockName);
+                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(MyBlockName, MyFrameMinPoint, MyFrameMaxPoint);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
@@ -109,7 +112,7 @@ namespace PrintWizard
             rbCommands.AddMyRibbonPanel();
         }
 
-        private static List<PlotObject> GetBlockReferencesBoundaries(String targetBlock)
+        private static List<PlotObject> GetBlockReferencesBoundaries(String targetBlock, Point3d minPoint, Point3d maxPoint)
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -141,22 +144,28 @@ namespace PrintWizard
                     if (bounds.HasValue)
                     {
                         obj.Extents = bounds.Value; // Extensions.Strip(bounds.Value);
-                    }                    
-
-                    // find attributes to create the name of file according to it's attribute values
-                    foreach (ObjectId attributeId in block.AttributeCollection)
-                    {
-                        var attribute = tr.GetObject(attributeId, OpenMode.ForRead) as AttributeReference;
-                        if (attribute == null)
-                            continue;
-                        if (attribute.Tag.Contains(MyBlockAttrLabel))
-                        {
-                            obj.Label = attribute.TextString;
-                        }
-                        if (attribute.Tag.Equals(MyBLockAttrSheet, StringComparison.CurrentCultureIgnoreCase))
-                            obj.Sheet = attribute.TextString;
                     }
-                    plotObjects.Add(obj);
+
+                    if (obj.Extents.MaxPoint.X <= maxPoint.X &&
+                        obj.Extents.MaxPoint.Y <= maxPoint.Y &&
+                        obj.Extents.MinPoint.X >= minPoint.X &&
+                        obj.Extents.MinPoint.Y >= minPoint.Y)
+                    {
+                        // find attributes to create the name of file according to it's attribute values
+                        foreach (ObjectId attributeId in block.AttributeCollection)
+                        {
+                            var attribute = tr.GetObject(attributeId, OpenMode.ForRead) as AttributeReference;
+                            if (attribute == null)
+                                continue;
+                            if (attribute.Tag.Contains(MyBlockAttrLabel))
+                            {
+                                obj.Label = attribute.TextString;
+                            }
+                            if (attribute.Tag.Equals(MyBLockAttrSheet, StringComparison.CurrentCultureIgnoreCase))
+                                obj.Sheet = attribute.TextString;
+                        }
+                        plotObjects.Add(obj);
+                    }
                 }
                 tr.Commit();
             }
