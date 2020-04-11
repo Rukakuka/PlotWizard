@@ -7,9 +7,8 @@ using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 
-namespace PlotWizard
+namespace PlotWizard.Ribbon.CommandHandlers
 {
-
     internal class ButtonChoosePlotObjCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
@@ -84,12 +83,12 @@ namespace PlotWizard
                 textbox = tab.FindItem("tbAttrSheet") as RibbonTextBox;
                 textbox.TextValue = RibbonCommands.AttrSheetName;
 
-                PlotWizard.MyBlockName = RibbonCommands.BlockName;
-                PlotWizard.MyBlockAttrLabel = RibbonCommands.AttrLabelName;
-                PlotWizard.MyBLockAttrSheet = RibbonCommands.AttrSheetName;
+                Wizard.MyBlockName = RibbonCommands.BlockName;
+                Wizard.MyBlockAttrLabel = RibbonCommands.AttrLabelName;
+                Wizard.MyBLockAttrSheet = RibbonCommands.AttrSheetName;
 
-                PlotWizard.MyFrameMaxPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
-                PlotWizard.MyFrameMinPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
+                Wizard.MyFrameMaxPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
+                Wizard.MyFrameMinPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
                 tr.Commit();
             }
         }

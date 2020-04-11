@@ -142,10 +142,8 @@ namespace PlotWizard
                                   5003, 2));
                                 double[] firres = new double[] { 0, 0, 0 };
                                 double[] secres = new double[] { 0, 0, 0 };
-                                _ = UnmanagedApi.AcedTrans(bottomLeft_3d.ToArray(), rbFrom.UnmanagedObject,
-                                  rbTo.UnmanagedObject, 0, firres);
-                                _ = UnmanagedApi.AcedTrans(topRight_3d.ToArray(), rbFrom.UnmanagedObject,
-                                  rbTo.UnmanagedObject, 0, secres);
+                                _ = PlotWizard.Core.UnmanagedApi.AcedTrans(bottomLeft_3d.ToArray(), rbFrom.UnmanagedObject, rbTo.UnmanagedObject, 0, firres);
+                                _ = PlotWizard.Core.UnmanagedApi.AcedTrans(topRight_3d.ToArray(), rbFrom.UnmanagedObject, rbTo.UnmanagedObject, 0, secres);
                                 Db.Extents2d extents = new Db.Extents2d(
                                     firres[0],
                                     firres[1],

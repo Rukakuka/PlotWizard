@@ -2,7 +2,7 @@
 using Autodesk.Windows;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 
-namespace PlotWizard
+namespace PlotWizard.Ribbon.CommandHandlers
 {
     internal class ButtonCommandHandler : System.Windows.Input.ICommand
     {

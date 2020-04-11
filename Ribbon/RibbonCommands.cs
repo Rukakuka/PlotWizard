@@ -44,7 +44,7 @@ namespace PlotWizard
             {
                 Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig((args.NewValue as RibbonButton).Text);
 
-                PlotWizard.MyPlotter = (args.NewValue as RibbonButton).Text;
+                Wizard.MyPlotter = (args.NewValue as RibbonButton).Text;
 
                 comboSheetSize.Items.Clear();
 
@@ -71,7 +71,7 @@ namespace PlotWizard
         {
             if (args.NewValue != null)
             {
-                PlotWizard.MyPageSize = Extensions.GetMediaNameList()[(args.NewValue as RibbonButton).Text];
+                Wizard.MyPageSize = Extensions.GetMediaNameList()[(args.NewValue as RibbonButton).Text];
             }
         }        
         public void AddMyRibbonPanel()
@@ -92,7 +92,7 @@ namespace PlotWizard
                 }
             }
             
-            Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(PlotWizard.MyPlotter);
+            Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Wizard.MyPlotter);
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
@@ -174,12 +174,12 @@ namespace PlotWizard
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
+                CommandHandler = new PlotWizard.Ribbon.CommandHandlers.TextboxCommandHandler(),
                 Height = 22,
                 Width = 50,
                 MinWidth = 50,
                 Size = RibbonItemSize.Large,
-                TextValue = PlotWizard.MyViewportScaling.ToString()
+                TextValue = Wizard.MyViewportScaling.ToString()
             };
 
             tbContentScaling = new RibbonTextBox
@@ -188,12 +188,12 @@ namespace PlotWizard
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
                 Height = 22,
                 Width = 50,
                 MinWidth = 50,
                 Size = RibbonItemSize.Large,
-                TextValue = PlotWizard.MyContentScaling.ToString(),
+                TextValue = Wizard.MyContentScaling.ToString(),
             };
 
             tbBlockName = new RibbonTextBox
@@ -204,7 +204,7 @@ namespace PlotWizard
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
@@ -220,7 +220,7 @@ namespace PlotWizard
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
@@ -236,7 +236,7 @@ namespace PlotWizard
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
@@ -261,7 +261,7 @@ namespace PlotWizard
                     ShowText = true
                 };
                 comboPlotterType.Items.Add(btn);
-                if (plotter.Equals(PlotWizard.MyPlotter))
+                if (plotter.Equals(Wizard.MyPlotter))
                 {
                     comboPlotterType.Current = btn;
                 }
@@ -285,7 +285,7 @@ namespace PlotWizard
                     ShowText = true
                 };
                 comboSheetSize.Items.Add(btn);
-                if (sheetSize.Value.Equals(PlotWizard.MyPageSize, StringComparison.InvariantCultureIgnoreCase))
+                if (sheetSize.Value.Equals(Wizard.MyPageSize, StringComparison.InvariantCultureIgnoreCase))
                 {
                     comboSheetSize.Current = btn;
                 }
@@ -294,7 +294,7 @@ namespace PlotWizard
 
             btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
-                CommandHandler = new ButtonChoosePlotObjCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonChoosePlotObjCommandHandler(),
                 Text = "Выбрать\nблок",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_12),
@@ -307,7 +307,7 @@ namespace PlotWizard
             btnCreateLayouts = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "CREATELAYOUTS",
-                CommandHandler = new ButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonCommandHandler(),
                 Text = "Создать\nлисты",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_15),
@@ -320,7 +320,7 @@ namespace PlotWizard
             btnEraseLayouts = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "ERASEALLLAYOUTS",
-                CommandHandler = new ButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonCommandHandler(),
                 Text = "Удалить\nлисты",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_16),
@@ -333,7 +333,7 @@ namespace PlotWizard
             btnMultiPlot = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "MULTIPLOT",
-                CommandHandler = new ButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonCommandHandler(),
                 Text = "Печать",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_18),

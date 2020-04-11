@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace PlotWizard
+namespace PlotWizard.Ribbon.CommandHandlers
 {
     internal class TextboxCommandHandler : System.Windows.Input.ICommand
     {
@@ -33,7 +33,7 @@ namespace PlotWizard
                             sc = Extensions.Clamp(sc, 0, 1);
                             tb.TextValue = sc.ToString();
                             RibbonCommands.ViewportScaling = sc;
-                            PlotWizard.MyViewportScaling = RibbonCommands.ViewportScaling;
+                            Wizard.MyViewportScaling = RibbonCommands.ViewportScaling;
                         }
                         catch (System.Exception) //Fromat, Argument, Overflow exceptions of Int32.Parse
                         {
@@ -47,7 +47,7 @@ namespace PlotWizard
                             sc = Extensions.Clamp(sc, 0, (double)Int32.MaxValue);
                             tb.TextValue = sc.ToString();
                             RibbonCommands.ContentScaling = sc;
-                            PlotWizard.MyContentScaling = RibbonCommands.ContentScaling;
+                            Wizard.MyContentScaling = RibbonCommands.ContentScaling;
                         }
                         catch (System.Exception)
                         {

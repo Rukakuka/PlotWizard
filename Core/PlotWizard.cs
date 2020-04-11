@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -11,23 +10,11 @@ using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 
-
-[assembly: Rt.CommandClass(typeof(PlotWizard.PlotWizard))]
+[assembly: Rt.CommandClass(typeof(PlotWizard.Wizard))]
 
 namespace PlotWizard
-{
-    internal class PlotObject
-    {
-        public String Label { get; set; }
-        public String Sheet { get; set; }
-        public Extents3d Extents { get; set; }
-    }
-    internal static class UnmanagedApi
-    {
-        [DllImport("accore.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "acedTrans")]
-        internal static extern int AcedTrans(double[] point, IntPtr fromRb, IntPtr toRb, int disp, double[] result);
-    }
-    public static class PlotWizard
+{ 
+    public static class Wizard
     {        
         public static string MyBlockName { get; set; }
         public static Point3d MyFrameMaxPoint { get; set; }
@@ -116,9 +103,8 @@ namespace PlotWizard
             Transaction tr = db.TransactionManager.StartTransaction();
 
             if (layouts != null && !layouts.IsDisposed)
-            { 
-                Layout layout = new Layout();
-                layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
+            {
+                Layout layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
                 filename = layout.LayoutName;
             }
             tr.Commit();

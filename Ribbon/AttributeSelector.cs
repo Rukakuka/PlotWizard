@@ -25,8 +25,8 @@ namespace PlotWizard.Ribbon
         }
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            PlotWizard.MyBlockAttrLabel = this.Prefix;
-            PlotWizard.MyBLockAttrSheet = this.Postfix;
+            Wizard.MyBlockAttrLabel = this.Prefix;
+            Wizard.MyBLockAttrSheet = this.Postfix;
             Close();
         }
         private void FillListBoxes(List<string> list)
