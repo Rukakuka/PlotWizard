@@ -11,6 +11,7 @@ using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 
+
 [assembly: Rt.CommandClass(typeof(PlotWizard.PlotWizard))]
 
 namespace PlotWizard
