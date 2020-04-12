@@ -16,25 +16,25 @@ namespace PlotWizard
 { 
     public static class Wizard
     {        
-        public static string MyBlockName { get; set; }
-        public static Point3d MyFrameMaxPoint { get; set; }
-        public static Point3d MyFrameMinPoint { get; set; }
-        public static string MyBlockAttrLabel { get; set; }
-        public static string MyBLockAttrSheet { get; set; }
-        public static double MyViewportScaling { get; set; }
-        public static double MyContentScaling { get; set; }
-        public static string MyPlotter { get; set; }
-        public static string MyPageSize { get; set; }
+        public static string TargetBlockName { get; set; }
+        public static Point3d FrameMaxPoint { get; set; }
+        public static Point3d FrameMinPoint { get; set; }
+        public static string Prefix { get; set; }
+        public static string Postfix { get; set; }
+        public static double ViewportScaling { get; set; }
+        public static double ContentScaling { get; set; }
+        public static string Plotter { get; set; }
+        public static string PageSize { get; set; }
         private static ObjectIdCollection Layouts { get; set; } 
         private const string MyPageStyle = "acad.ctb";
 
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
         public static void Plotwizard()
         {
-            MyPlotter = "DWG To PDF.pc3";
-            MyPageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
-            MyContentScaling = 1.003;
-            MyViewportScaling = 1;
+            Plotter = "DWG To PDF.pc3";
+            PageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
+            ContentScaling = 1.003;
+            ViewportScaling = 1;
             Layouts = new ObjectIdCollection(); // stores the newly-created layouts
             AddMyRibbonPanel();
         }
@@ -49,13 +49,13 @@ namespace PlotWizard
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(MyBlockName, MyFrameMinPoint, MyFrameMaxPoint);
+                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(TargetBlockName, FrameMinPoint, FrameMaxPoint);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
                 foreach (var plotObject in plotObjects)
                 {
-                    ObjectId lay = lc.CreateMyLayout(MyPageSize, MyViewportScaling, MyContentScaling, MyPageStyle, MyPlotter, plotObject);
+                    ObjectId lay = lc.CreateMyLayout(PageSize, ViewportScaling, ContentScaling, MyPageStyle, Plotter, plotObject);
                     if (!lay.IsNull)
                         Layouts.Add(lay);
                 }
@@ -86,7 +86,7 @@ namespace PlotWizard
                 return;
             }
 
-            MultiSheetPlot.MultiSheetPlotter(MyPageSize, MyPlotter, saveFileDialog.FileName, Layouts);
+            MultiSheetPlot.MultiSheetPlotter(PageSize, Plotter, saveFileDialog.FileName, Layouts);
         }
 
         [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
@@ -162,11 +162,11 @@ namespace PlotWizard
                             var attribute = tr.GetObject(attributeId, OpenMode.ForRead) as AttributeReference;
                             if (attribute == null)
                                 continue;
-                            if (attribute.Tag.Contains(MyBlockAttrLabel))
+                            if (attribute.Tag.Contains(Prefix))
                             {
                                 obj.Label = attribute.TextString;
                             }
-                            if (attribute.Tag.Equals(MyBLockAttrSheet, StringComparison.CurrentCultureIgnoreCase))
+                            if (attribute.Tag.Equals(Postfix, StringComparison.CurrentCultureIgnoreCase))
                                 obj.Sheet = attribute.TextString;
                         }
                         plotObjects.Add(obj);

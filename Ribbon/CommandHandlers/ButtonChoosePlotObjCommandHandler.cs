@@ -62,10 +62,10 @@ namespace PlotWizard.Ribbon.CommandHandlers
 
                 RibbonCommands.BlockName = br.Name;
 
-                RibbonTab tab = FindRibbonTab(RibbonCommands.TargetTab);
+                RibbonTab tab = FindRibbonTab(RibbonCommands.TargetTabName);
 
                 if (tab == null)
-                    throw new ArgumentNullException($"Tab not found: {RibbonCommands.TargetTab}");
+                    throw new ArgumentNullException($"Tab not found: {RibbonCommands.TargetTabName}");
 
                 var textbox = tab.FindItem("tbBlockName") as RibbonTextBox;
                 textbox.TextValue = RibbonCommands.BlockName;
@@ -75,20 +75,20 @@ namespace PlotWizard.Ribbon.CommandHandlers
                 Ribbon.AttributeSelector attrSelector = new Ribbon.AttributeSelector(attrCollection);
                 attrSelector.ShowDialog();
 
-                RibbonCommands.AttrLabelName = attrSelector.Prefix;
-                RibbonCommands.AttrSheetName = attrSelector.Postfix;
+                RibbonCommands.Prefix = attrSelector.Prefix;
+                RibbonCommands.Postfix = attrSelector.Postfix;
 
-                textbox = tab.FindItem("tbAttrLabel") as RibbonTextBox;
-                textbox.TextValue = RibbonCommands.AttrLabelName;
-                textbox = tab.FindItem("tbAttrSheet") as RibbonTextBox;
-                textbox.TextValue = RibbonCommands.AttrSheetName;
+                textbox = tab.FindItem("tbPrefix") as RibbonTextBox;
+                textbox.TextValue = RibbonCommands.Prefix;
+                textbox = tab.FindItem("tbPostfix") as RibbonTextBox;
+                textbox.TextValue = RibbonCommands.Postfix;
 
-                Wizard.MyBlockName = RibbonCommands.BlockName;
-                Wizard.MyBlockAttrLabel = RibbonCommands.AttrLabelName;
-                Wizard.MyBLockAttrSheet = RibbonCommands.AttrSheetName;
+                Wizard.TargetBlockName = RibbonCommands.BlockName;
+                Wizard.Prefix = RibbonCommands.Prefix;
+                Wizard.Postfix = RibbonCommands.Postfix;
 
-                Wizard.MyFrameMaxPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
-                Wizard.MyFrameMinPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
+                Wizard.FrameMaxPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
+                Wizard.FrameMinPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
                 tr.Commit();
             }
         }

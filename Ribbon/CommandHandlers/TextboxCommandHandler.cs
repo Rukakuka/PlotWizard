@@ -20,11 +20,11 @@ namespace PlotWizard.Ribbon.CommandHandlers
                     case "tbBlockName":
                         RibbonCommands.BlockName = tb.TextValue;
                         break;
-                    case "tbAttrLabel":
-                        RibbonCommands.AttrLabelName = tb.TextValue;
+                    case "tbPrefix":
+                        RibbonCommands.Prefix = tb.TextValue;
                         break;
-                    case "tbAttrSheet":
-                        RibbonCommands.AttrSheetName = tb.TextValue;
+                    case "tbPostfix":
+                        RibbonCommands.Postfix = tb.TextValue;
                         break;
                     case "tbViewportScaling":
                         try
@@ -33,9 +33,9 @@ namespace PlotWizard.Ribbon.CommandHandlers
                             sc = Extensions.Clamp(sc, 0, 1);
                             tb.TextValue = sc.ToString();
                             RibbonCommands.ViewportScaling = sc;
-                            Wizard.MyViewportScaling = RibbonCommands.ViewportScaling;
+                            Wizard.ViewportScaling = RibbonCommands.ViewportScaling;
                         }
-                        catch (System.Exception) //Fromat, Argument, Overflow exceptions of Int32.Parse
+                        catch (System.Exception) //Fromat, Argument, Overflow exceptions of double.Parse -> set previous value
                         {
                             tb.TextValue = RibbonCommands.ViewportScaling.ToString();
                         }
@@ -47,7 +47,7 @@ namespace PlotWizard.Ribbon.CommandHandlers
                             sc = Extensions.Clamp(sc, 0, (double)Int32.MaxValue);
                             tb.TextValue = sc.ToString();
                             RibbonCommands.ContentScaling = sc;
-                            Wizard.MyContentScaling = RibbonCommands.ContentScaling;
+                            Wizard.ContentScaling = RibbonCommands.ContentScaling;
                         }
                         catch (System.Exception)
                         {

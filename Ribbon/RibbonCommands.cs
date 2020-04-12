@@ -13,19 +13,19 @@ namespace PlotWizard
 {
     internal class RibbonCommands : IExtensionApplication
     {
-        public const string TargetTab = "Вывод";
-        private const string Title = "Печать блоков";
+        public  const string TargetTabName = "Вывод";
+        private const string TargetPanelName = "Печать блоков";
         public static string BlockName { get; set; }
-        public static string AttrLabelName { get; set; }
-        public static string AttrSheetName { get; set; }
+        public static string Prefix { get; set; }
+        public static string Postfix { get; set; }
         public static double ViewportScaling { get; set; }
         public static double ContentScaling { get; set; }
 
         private RibbonTextBox tbViewportScaling;
         private RibbonTextBox tbContentScaling;
         private RibbonTextBox tbBlockName;
-        private RibbonTextBox tbAttrLabel;
-        private RibbonTextBox tbAttrSheet;
+        private RibbonTextBox tbPrefix;
+        private RibbonTextBox tbPostfix;
 
         private RibbonCombo comboPlotterType;
         private RibbonCombo comboSheetSize;
@@ -44,7 +44,7 @@ namespace PlotWizard
             {
                 Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig((args.NewValue as RibbonButton).Text);
 
-                Wizard.MyPlotter = (args.NewValue as RibbonButton).Text;
+                Wizard.Plotter = (args.NewValue as RibbonButton).Text;
 
                 comboSheetSize.Items.Clear();
 
@@ -71,7 +71,7 @@ namespace PlotWizard
         {
             if (args.NewValue != null)
             {
-                Wizard.MyPageSize = Extensions.GetMediaNameList()[(args.NewValue as RibbonButton).Text];
+                Wizard.PageSize = Extensions.GetMediaNameList()[(args.NewValue as RibbonButton).Text];
             }
         }        
         public void AddMyRibbonPanel()
@@ -79,11 +79,11 @@ namespace PlotWizard
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)
             {
-                if (tab.Title.Equals("Вывод", StringComparison.InvariantCultureIgnoreCase))
+                if (tab.Title.Equals(TargetTabName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     foreach (var panel in tab.Panels)
                     {
-                        if (panel.Source.Title.Equals(Title, StringComparison.InvariantCultureIgnoreCase))
+                        if (panel.Source.Title.Equals(TargetPanelName, StringComparison.InvariantCultureIgnoreCase))
                         {
                             System.Windows.MessageBox.Show("Вкладка уже добавлена");
                             return;
@@ -92,20 +92,20 @@ namespace PlotWizard
                 }
             }
             
-            Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Wizard.MyPlotter);
+            Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Wizard.Plotter);
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
-                ToolTip = "Имя блока для печати",
+                ToolTip = "Имя блока для печати  ",
                 IsToolTipEnabled = true,
                 Height = 22,
                 ShowImage = true,
                 Size = RibbonItemSize.Standard,
                 Image = Extensions.GetBitmap(Properties.Resources.icon_22)
             };
-            RibbonLabel labelAttrLabelName = new RibbonLabel
+            RibbonLabel labelPrefix = new RibbonLabel
             {
-                ToolTip = "Имя атрибута - чертеж",
+                ToolTip = "Имя атрибута - префикс  ",
                 IsToolTipEnabled = true,
                 ShowImage = true,
                 Size = RibbonItemSize.Standard,
@@ -113,9 +113,9 @@ namespace PlotWizard
                 Height = 22
             };
             
-            RibbonLabel labelAttrSheetName = new RibbonLabel
+            RibbonLabel labelPostfix = new RibbonLabel
             {
-                ToolTip = "Имя атрибута - лист  ",
+                ToolTip = "Имя атрибута - постфикс  ",
                 IsToolTipEnabled = true,
                 Height = 22,
                 ShowImage = true,
@@ -123,15 +123,6 @@ namespace PlotWizard
                 Image = Extensions.GetBitmap(Properties.Resources.icon_19)
             };
 
-            RibbonLabel labelFileName = new RibbonLabel
-            {
-                ToolTip = "Имя файла  ",
-                IsToolTipEnabled = true,
-                Height = 22,
-                ShowImage = true,
-                Size = RibbonItemSize.Standard,
-                Image = Extensions.GetBitmap(Properties.Resources.icon_21)
-            };
             RibbonLabel labelPlotterType = new RibbonLabel
             {
                 ToolTip = "Плоттер  ",
@@ -179,7 +170,7 @@ namespace PlotWizard
                 Width = 50,
                 MinWidth = 50,
                 Size = RibbonItemSize.Large,
-                TextValue = Wizard.MyViewportScaling.ToString()
+                TextValue = Wizard.ViewportScaling.ToString()
             };
 
             tbContentScaling = new RibbonTextBox
@@ -193,7 +184,7 @@ namespace PlotWizard
                 Width = 50,
                 MinWidth = 50,
                 Size = RibbonItemSize.Large,
-                TextValue = Wizard.MyContentScaling.ToString(),
+                TextValue = Wizard.ContentScaling.ToString(),
             };
 
             tbBlockName = new RibbonTextBox
@@ -212,10 +203,10 @@ namespace PlotWizard
                 Text = "",
             };
 
-            tbAttrLabel = new RibbonTextBox
+            tbPrefix = new RibbonTextBox
             {
-                Id = "tbAttrLabel",
-                ToolTip = "Имя атрибута - чертеж",
+                Id = "tbPrefix",
+                ToolTip = "Имя атрибута - префикс  ",
                 IsToolTipEnabled = true,
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
@@ -228,11 +219,11 @@ namespace PlotWizard
                 Text = ""
             };
 
-            tbAttrSheet = new RibbonTextBox
+            tbPostfix = new RibbonTextBox
             {
-                ToolTip = "Имя атрибута - лист  ",
+                ToolTip = "Имя атрибута - постфикс  ",
                 IsToolTipEnabled = true,
-                Id = "tbAttrSheet",
+                Id = "tbPostfix",
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
@@ -261,7 +252,7 @@ namespace PlotWizard
                     ShowText = true
                 };
                 comboPlotterType.Items.Add(btn);
-                if (plotter.Equals(Wizard.MyPlotter))
+                if (plotter.Equals(Wizard.Plotter))
                 {
                     comboPlotterType.Current = btn;
                 }
@@ -285,7 +276,7 @@ namespace PlotWizard
                     ShowText = true
                 };
                 comboSheetSize.Items.Add(btn);
-                if (sheetSize.Value.Equals(Wizard.MyPageSize, StringComparison.InvariantCultureIgnoreCase))
+                if (sheetSize.Value.Equals(Wizard.PageSize, StringComparison.InvariantCultureIgnoreCase))
                 {
                     comboSheetSize.Current = btn;
                 }
@@ -295,7 +286,7 @@ namespace PlotWizard
             btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
                 CommandHandler = new Ribbon.CommandHandlers.ButtonChoosePlotObjCommandHandler(),
-                Text = "Выбрать\nблок",
+                Text = "Выбрать\nобъекты\nпечати",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_12),
                 Size = RibbonItemSize.Large,
@@ -345,16 +336,16 @@ namespace PlotWizard
             RibbonRowPanel row1 = new RibbonRowPanel();
             row1.Items.Add(labelBlockName);
             row1.Items.Add(new RibbonRowBreak());
-            row1.Items.Add(labelAttrLabelName);
+            row1.Items.Add(labelPrefix);
             row1.Items.Add(new RibbonRowBreak());
-            row1.Items.Add(labelAttrSheetName);
+            row1.Items.Add(labelPostfix);
             
             RibbonRowPanel row2 = new RibbonRowPanel();
             row2.Items.Add(tbBlockName);
             row2.Items.Add(new RibbonRowBreak());
-            row2.Items.Add(tbAttrLabel);
+            row2.Items.Add(tbPrefix);
             row2.Items.Add(new RibbonRowBreak());
-            row2.Items.Add(tbAttrSheet);
+            row2.Items.Add(tbPostfix);
 
             RibbonRowPanel row3 = new RibbonRowPanel();
             row3.Items.Add(labelPlotterType);
@@ -398,7 +389,7 @@ namespace PlotWizard
 
             foreach (var tab in ribbon.Tabs)
             {
-                if (tab.Title.Equals("Вывод")) 
+                if (tab.Title.Equals(TargetPanelName)) 
                 {
                     tab.Panels.Add(plotWizardPanel);
                     tab.IsActive = true;
