@@ -29,9 +29,9 @@ namespace PlotWizard
 
                 if (String.IsNullOrEmpty(layoutName))
                 {
-                    System.Windows.MessageBox.Show("fail");
-                    ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
-                    return new ObjectId();
+                    //ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
+                    //return new ObjectId();
+                    layoutName = "Layout";
                 }
                 
                 // Consecutevly check if there is already a list with the same name, else add (1), (2) etc. to the name
@@ -42,7 +42,6 @@ namespace PlotWizard
                     overridedLayoutName = layoutName + $" ({i.ToString()})";
                     i++;
                 }
-                System.Windows.MessageBox.Show("Raw: '" + layoutName + "'" + "_Overrided: '" + overridedLayoutName + "'");
                 ObjectId id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
                 ObjectId layoutId = new ObjectId();
 

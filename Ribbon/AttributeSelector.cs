@@ -12,10 +12,7 @@ namespace PlotWizard.Ribbon
         public AttributeSelector(List<string> attrCollection)
         {
             InitializeComponent();
-            if (attrCollection != null)
-                FillListBoxes(attrCollection);
-            listBoxPrefix.SelectedIndex = 0;
-            listBoxPostfix.SelectedIndex = 0;
+            FillListBoxes(attrCollection);
         }
         private void ButtonOk_Click(object sender, EventArgs e)
         {
@@ -27,21 +24,23 @@ namespace PlotWizard.Ribbon
         {
             listBoxPrefix.Items.Add("None");
             listBoxPostfix.Items.Add("None");
-            foreach (var attr in list)
+            if (list != null && list.Count > 0)
             {
-                listBoxPrefix.Items.Add(attr);
-                listBoxPostfix.Items.Add(attr);
+                foreach (var attr in list)
+                {
+                    listBoxPrefix.Items.Add(attr);
+                    listBoxPostfix.Items.Add(attr);
+                }
             }
+            listBoxPrefix.SelectedIndex = 0;
+            listBoxPostfix.SelectedIndex = 0;
         }
         private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListBox lb;
-            if (sender is ListBox)
+            if (sender is ListBox lb)
             {
-                lb = (ListBox)sender;
-                string text;
-                text = lb.Text.Equals("None") ? "" : lb.Text;
-                  
+                string text = lb.Text.Equals("None") ? " " : lb.Text;
+
                 switch (lb.Name)
                 {
                     case "listBoxPrefix":
