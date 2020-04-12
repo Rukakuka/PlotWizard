@@ -3,8 +3,8 @@
 namespace PlotWizard
 {    internal class PlotObject
     {
-        public string Label { get; set; }
-        public string Sheet { get; set; }
+        public string Prefix { get; set; }
+        public string Postfix { get; set; }
         public Extents3d Extents { get; set; }
     }
 }

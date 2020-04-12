@@ -24,11 +24,12 @@ namespace PlotWizard
 
             using (var tr = db.TransactionManager.StartTransaction())
             {
-                String layoutName = plotObject.Label + " Лист " + plotObject.Sheet;
+                String layoutName = plotObject.Prefix + " " + plotObject.Postfix;
                 layoutName = Extensions.PurgeString(layoutName.Trim());
 
                 if (String.IsNullOrEmpty(layoutName))
                 {
+                    System.Windows.MessageBox.Show("fail");
                     ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
                     return new ObjectId();
                 }
@@ -41,7 +42,7 @@ namespace PlotWizard
                     overridedLayoutName = layoutName + $" ({i.ToString()})";
                     i++;
                 }
-
+                System.Windows.MessageBox.Show("Raw: '" + layoutName + "'" + "_Overrided: '" + overridedLayoutName + "'");
                 ObjectId id = LayoutManager.Current.CreateAndMakeLayoutCurrent(overridedLayoutName);
                 ObjectId layoutId = new ObjectId();
 

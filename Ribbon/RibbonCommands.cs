@@ -79,11 +79,11 @@ namespace PlotWizard
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)
             {
-                if (tab.Title.Equals(TargetTabName, StringComparison.InvariantCultureIgnoreCase))
+                if (tab.Title.Equals(TargetTabName))
                 {
                     foreach (var panel in tab.Panels)
                     {
-                        if (panel.Source.Title.Equals(TargetPanelName, StringComparison.InvariantCultureIgnoreCase))
+                        if (panel.Source.Title.Equals(TargetPanelName))
                         {
                             System.Windows.MessageBox.Show("Вкладка уже добавлена");
                             return;
@@ -91,7 +91,7 @@ namespace PlotWizard
                     }
                 }
             }
-            
+
             Autodesk.AutoCAD.PlottingServices.PlotConfig plotConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Wizard.Plotter);
 
             RibbonLabel labelBlockName = new RibbonLabel
@@ -389,7 +389,7 @@ namespace PlotWizard
 
             foreach (var tab in ribbon.Tabs)
             {
-                if (tab.Title.Equals(TargetPanelName)) 
+                if (tab.Title.Equals(TargetTabName)) 
                 {
                     tab.Panels.Add(plotWizardPanel);
                     tab.IsActive = true;

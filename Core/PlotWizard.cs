@@ -121,7 +121,7 @@ namespace PlotWizard
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
-            // create a collection where stored needed block references
+            // create a collection where stored block entries references
             List<PlotObject> plotObjects = new List<PlotObject>();
             // start transaction
             using (Transaction tr = db.TransactionManager.StartTransaction())
@@ -130,7 +130,7 @@ namespace PlotWizard
                 var blockTable = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
                 if (blockTable == null)
                     return plotObjects;
-                // get table of all drawing's blocks references in current modelspace
+                // get table of all blocks references in current modelspace
                 var blockTableRecord = tr.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForRead) as BlockTableRecord;
                 if (blockTableRecord == null)
                     return plotObjects;
@@ -144,12 +144,10 @@ namespace PlotWizard
                     if (!block.Name.Equals(targetBlock, StringComparison.CurrentCultureIgnoreCase))
                         continue;
                     
-                    Extents3d? bounds = block.Bounds;
+                    var bounds = block.Bounds;
                     PlotObject obj = new PlotObject();
                     if (bounds.HasValue)
-                    {
                         obj.Extents = bounds.Value; // Extensions.Strip(bounds.Value);
-                    }
 
                     if (obj.Extents.MaxPoint.X <= maxPoint.X &&
                         obj.Extents.MaxPoint.Y <= maxPoint.Y &&
@@ -164,10 +162,10 @@ namespace PlotWizard
                                 continue;
                             if (attribute.Tag.Contains(Prefix))
                             {
-                                obj.Label = attribute.TextString;
+                                obj.Prefix = attribute.TextString;
                             }
                             if (attribute.Tag.Equals(Postfix, StringComparison.CurrentCultureIgnoreCase))
-                                obj.Sheet = attribute.TextString;
+                                obj.Postfix = attribute.TextString;
                         }
                         plotObjects.Add(obj);
                     }

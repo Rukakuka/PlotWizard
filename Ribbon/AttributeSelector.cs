@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PlotWizard.Ribbon
@@ -31,8 +25,8 @@ namespace PlotWizard.Ribbon
         }
         private void FillListBoxes(List<string> list)
         {
-            listBoxPrefix.Items.Add("Нет");
-            listBoxPostfix.Items.Add("Нет");
+            listBoxPrefix.Items.Add("None");
+            listBoxPostfix.Items.Add("None");
             foreach (var attr in list)
             {
                 listBoxPrefix.Items.Add(attr);
@@ -46,7 +40,7 @@ namespace PlotWizard.Ribbon
             {
                 lb = (ListBox)sender;
                 string text;
-                text = lb.Text.Equals("Нет") ? "" : lb.Text;
+                text = lb.Text.Equals("None") ? "" : lb.Text;
                   
                 switch (lb.Name)
                 {
