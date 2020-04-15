@@ -28,11 +28,7 @@ namespace PlotWizard
                 layoutName = Extensions.PurgeString(layoutName.Trim());
 
                 if (String.IsNullOrEmpty(layoutName))
-                {
-                    //ed.WriteMessage("\nИмя листа не содержит символов. Пропущено.\n");
-                    //return new ObjectId();
                     layoutName = "Layout";
-                }
                 
                 // Consecutevly check if there is already a list with the same name, else add (1), (2) etc. to the name
                 string overridedLayoutName = layoutName;
