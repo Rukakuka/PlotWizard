@@ -17,8 +17,8 @@ namespace PlotWizard
     public static class Wizard
     {        
         public static string TargetBlockName { get; set; }
-        public static Point3d FrameMaxPoint { get; set; }
-        public static Point3d FrameMinPoint { get; set; }
+        public static Point3d MaxCornerPoint { get; set; }
+        public static Point3d MinCornerPoint { get; set; }
         public static string Prefix { get; set; }
         public static string Postfix { get; set; }
         public static double ViewportScaling { get; set; }
@@ -49,7 +49,7 @@ namespace PlotWizard
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(TargetBlockName, FrameMinPoint, FrameMaxPoint);
+                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(TargetBlockName, MinCornerPoint, MaxCornerPoint);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
@@ -117,7 +117,7 @@ namespace PlotWizard
             rbCommands.AddMyRibbonPanel();
         }
 
-        private static List<PlotObject> GetBlockReferencesBoundaries(String targetBlock, Point3d minPoint, Point3d maxPoint)
+        private static List<PlotObject> GetBlockReferencesBoundaries(String targetBlock, Point3d minCornerPoint, Point3d maxCornerPoint)
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -149,10 +149,10 @@ namespace PlotWizard
                     if (bounds.HasValue)
                         obj.Extents = bounds.Value; // Extensions.Strip(bounds.Value);
 
-                    if (obj.Extents.MaxPoint.X <= maxPoint.X &&
-                        obj.Extents.MaxPoint.Y <= maxPoint.Y &&
-                        obj.Extents.MinPoint.X >= minPoint.X &&
-                        obj.Extents.MinPoint.Y >= minPoint.Y)
+                    if (obj.Extents.MaxPoint.X <= maxCornerPoint.X &&
+                        obj.Extents.MaxPoint.Y <= maxCornerPoint.Y &&
+                        obj.Extents.MinPoint.X >= minCornerPoint.X &&
+                        obj.Extents.MinPoint.Y >= minCornerPoint.Y)
                     {
                         // find attributes to create the name of file according to it's attribute values
                         foreach (ObjectId attributeId in block.AttributeCollection)
@@ -170,9 +170,47 @@ namespace PlotWizard
                         plotObjects.Add(obj);
                     }
                 }
+                plotObjects = SortPlotObjectsByCoordinates(plotObjects);
                 tr.Commit();
             }
             return plotObjects;
+        }
+
+        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects)
+        {
+            var sortedList = new List<PlotObject>();
+            int position = 0;
+            int plotObjectsCount = plotObjects.Count;
+            for (int i = 0; i < plotObjectsCount; i++)
+            {
+                double minX = Double.MaxValue;
+                double minY = Double.MaxValue;
+                for (int j = 0; j < plotObjects.Count; j++)
+                {
+                    if (plotObjects[j].Extents.MinPoint.X < minX)
+                    {
+                        minX = plotObjects[j].Extents.MinPoint.X;
+                        minY = plotObjects[j].Extents.MinPoint.Y;
+                        position = j;
+                    }
+                    else if (Math.Abs(plotObjects[j].Extents.MinPoint.X - minX) > 1e-6 && plotObjects[j].Extents.MinPoint.Y > minY)
+                    {
+                        minY = plotObjects[j].Extents.MinPoint.Y;
+                        position = j;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (plotObjects.Count == 0)
+                    continue;
+                
+                sortedList.Add(plotObjects[position]);
+                plotObjects.RemoveAt(position);
+                
+            }
+            return sortedList;
         }
     }
 }

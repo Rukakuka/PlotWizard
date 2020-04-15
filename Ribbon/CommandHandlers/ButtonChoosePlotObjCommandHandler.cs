@@ -87,8 +87,8 @@ namespace PlotWizard.Ribbon.CommandHandlers
                 Wizard.Prefix = RibbonCommands.Prefix;
                 Wizard.Postfix = RibbonCommands.Postfix;
 
-                Wizard.FrameMaxPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
-                Wizard.FrameMinPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
+                Wizard.MaxCornerPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
+                Wizard.MinCornerPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
                 tr.Commit();
             }
         }
