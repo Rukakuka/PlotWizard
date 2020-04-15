@@ -49,7 +49,7 @@ namespace PlotWizard
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetBlockReferencesBoundaries(TargetBlockName, MinCornerPoint, MaxCornerPoint);
+                List<PlotObject> plotObjects = GetPlotObjects(TargetBlockName, MinCornerPoint, MaxCornerPoint);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
@@ -117,7 +117,7 @@ namespace PlotWizard
             rbCommands.AddMyRibbonPanel();
         }
 
-        private static List<PlotObject> GetBlockReferencesBoundaries(String targetBlock, Point3d minCornerPoint, Point3d maxCornerPoint)
+        private static List<PlotObject> GetPlotObjects(String targetBlockName, Point3d minCornerPoint, Point3d maxCornerPoint)
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -141,7 +141,7 @@ namespace PlotWizard
                     var block = tr.GetObject(blockRecord, OpenMode.ForRead) as BlockReference;
                     if (block == null)
                         continue;
-                    if (!block.Name.Equals(targetBlock, StringComparison.CurrentCultureIgnoreCase))
+                    if (!block.Name.Equals(targetBlockName, StringComparison.CurrentCultureIgnoreCase))
                         continue;
                     
                     var bounds = block.Bounds;
