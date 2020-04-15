@@ -204,7 +204,7 @@ namespace PlotWizard
                     }
                 }
                 if (plotObjects.Count == 0)
-                    continue;
+                    break;
                 
                 sortedList.Add(plotObjects[position]);
                 plotObjects.RemoveAt(position);
