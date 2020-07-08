@@ -71,6 +71,12 @@ namespace PlotWizard
             if (doc == null)
                 return;
 
+            if (Layouts == null || Layouts.IsDisposed || Layouts.Count == 0)
+            {
+                System.Windows.MessageBox.Show("Нет объектов для печати. Пропущено.");
+                return;
+            }
+
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Title = "Вывод в файл",
@@ -85,7 +91,6 @@ namespace PlotWizard
                 doc.Editor.WriteMessage("\nОтмена.\n");
                 return;
             }
-
             MultiSheetPlot.MultiSheetPlotter(PageSize, Plotter, saveFileDialog.FileName, Layouts);
         }
 
@@ -102,10 +107,21 @@ namespace PlotWizard
             Database db = doc.Database;
             Transaction tr = db.TransactionManager.StartTransaction();
 
-            if (layouts != null && !layouts.IsDisposed)
+            if (layouts != null && !layouts.IsDisposed && layouts.Count > 0)
             {
-                Layout layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
-                filename = layout.LayoutName;
+                try
+                {
+                    Layout layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
+                    filename = layout.LayoutName;
+                }
+                catch (Exception e)
+                {
+                    return "";
+                }
+            }
+            else
+            {
+                return "";
             }
             tr.Commit();
             return filename;
