@@ -176,10 +176,11 @@ namespace PlotWizard
             return plotObjects;
         }
 
-        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects)
+        private static List<PlotObject> SortPlotObjectsByCoordinatesObsolete(List<PlotObject> plotObjects)
         {
             var sortedList = new List<PlotObject>();
             int position = 0;
+
             int plotObjectsCount = plotObjects.Count;
             for (int i = 0; i < plotObjectsCount; i++)
             {
@@ -209,6 +210,43 @@ namespace PlotWizard
                 sortedList.Add(plotObjects[position]);
                 plotObjects.RemoveAt(position);
                 
+            }
+            return sortedList;
+        }
+        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects)
+        {
+            var sortedList = new List<PlotObject>();
+            int position = 0;
+
+            int plotObjectsCount = plotObjects.Count;
+            for (int i = 0; i < plotObjectsCount; i++)
+            {
+                double minX = Double.MaxValue;
+                double minY = Double.MaxValue;
+                for (int j = 0; j < plotObjects.Count; j++)
+                {
+                    if (plotObjects[j].Extents.MinPoint.Y < minY)
+                    {
+                        minX = plotObjects[j].Extents.MinPoint.X;
+                        minY = plotObjects[j].Extents.MinPoint.Y;
+                        position = j;
+                    }
+                    else if (Math.Abs(plotObjects[j].Extents.MinPoint.Y - minY) > 1e-6 && plotObjects[j].Extents.MinPoint.X > minX)
+                    {
+                        minY = plotObjects[j].Extents.MinPoint.Y;
+                        position = j;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (plotObjects.Count == 0)
+                    break;
+
+                sortedList.Add(plotObjects[position]);
+                plotObjects.RemoveAt(position);
+
             }
             return sortedList;
         }
