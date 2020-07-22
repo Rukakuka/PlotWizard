@@ -232,36 +232,49 @@ namespace PlotWizard
         private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects)
         {
             var sortedList = new List<PlotObject>();
-            int position = 0;
+            int position;
 
             int plotObjectsCount = plotObjects.Count;
             for (int i = 0; i < plotObjectsCount; i++)
             {
                 double minX = Double.MaxValue;
                 double minY = Double.MaxValue;
+                position = -1;
                 for (int j = 0; j < plotObjects.Count; j++)
                 {
-                    if (plotObjects[j].Extents.MinPoint.Y < minY)
+                    if (Math.Abs(Math.Abs(plotObjects[j].Extents.MinPoint.Y) - Math.Abs(minY)) > 1e-3)
                     {
-                        minX = plotObjects[j].Extents.MinPoint.X;
-                        minY = plotObjects[j].Extents.MinPoint.Y;
-                        position = j;
+                        if (plotObjects[j].Extents.MinPoint.Y < minY)
+                        {
+                            minX = plotObjects[j].Extents.MinPoint.X;
+                            minY = plotObjects[j].Extents.MinPoint.Y;
+                            position = j;
+                        }
                     }
-                    else if (Math.Abs(plotObjects[j].Extents.MinPoint.Y - minY) > 1e-6 && plotObjects[j].Extents.MinPoint.X > minX)
+                    // objects are aligned through X-axis
+                    else if (Math.Abs(Math.Abs(plotObjects[j].Extents.MinPoint.X) - Math.Abs(minX)) > 1e-3)
                     {
-                        minY = plotObjects[j].Extents.MinPoint.Y;
-                        position = j;
+                        if (plotObjects[j].Extents.MinPoint.X < minX)
+                        {
+                            minX = plotObjects[j].Extents.MinPoint.X;
+                            minY = plotObjects[j].Extents.MinPoint.Y;
+                            position = j;
+                        }
                     }
+                    // same position of objects
                     else
                     {
-                        continue;
+                        position = plotObjects.Count - 1;
                     }
                 }
+
                 if (plotObjects.Count == 0)
                     break;
-
-                sortedList.Add(plotObjects[position]);
-                plotObjects.RemoveAt(position);
+                if (position != -1)
+                {
+                    sortedList.Add(plotObjects[position]);
+                    plotObjects.RemoveAt(position);
+                }
 
             }
             return sortedList;
