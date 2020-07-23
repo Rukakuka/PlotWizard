@@ -242,6 +242,7 @@ namespace PlotWizard
                 position = -1;
                 for (int j = 0; j < plotObjects.Count; j++)
                 {
+                    // check what Y is minimal
                     if (Math.Abs(Math.Abs(plotObjects[j].Extents.MinPoint.Y) - Math.Abs(minY)) > 1e-3)
                     {
                         if (plotObjects[j].Extents.MinPoint.Y < minY)
@@ -251,7 +252,7 @@ namespace PlotWizard
                             position = j;
                         }
                     }
-                    // objects are aligned through X-axis
+                    // objects are aligned through X-axis - check what X is minimal
                     else if (Math.Abs(Math.Abs(plotObjects[j].Extents.MinPoint.X) - Math.Abs(minX)) > 1e-3)
                     {
                         if (plotObjects[j].Extents.MinPoint.X < minX)
@@ -261,10 +262,12 @@ namespace PlotWizard
                             position = j;
                         }
                     }
-                    // same position of objects
+                    //  objects are aligned through X-axis & Y-axis => same position of objects
                     else
                     {
-                        position = plotObjects.Count - 1;
+                        minX = plotObjects[j].Extents.MinPoint.X;
+                        minY = plotObjects[j].Extents.MinPoint.Y;
+                        position = j;
                     }
                 }
 
