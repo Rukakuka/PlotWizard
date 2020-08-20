@@ -79,10 +79,16 @@ namespace PlotWizard.Ribbon.CommandHandlers
                 RibbonCommands.Postfix = attrSelector.Postfix;
 
                 textbox = tab.FindItem("tbPrefix") as RibbonTextBox;
-                textbox.TextValue = RibbonCommands.Prefix;
+                if (textbox != null)
+                {
+                    textbox.TextValue = RibbonCommands.Prefix;
+                }
                 textbox = tab.FindItem("tbPostfix") as RibbonTextBox;
-                textbox.TextValue = RibbonCommands.Postfix;
-
+                if (textbox != null)
+                {
+                    textbox.TextValue = RibbonCommands.Postfix;
+                }
+                
                 Wizard.TargetBlockName = RibbonCommands.BlockName;
                 Wizard.Prefix = RibbonCommands.Prefix;
                 Wizard.Postfix = RibbonCommands.Postfix;

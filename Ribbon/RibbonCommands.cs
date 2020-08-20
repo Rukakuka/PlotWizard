@@ -2,12 +2,6 @@
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
 using System;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using acad = Autodesk.AutoCAD.ApplicationServices.Application;
-using Ap = Autodesk.AutoCAD.ApplicationServices;
-using Db = Autodesk.AutoCAD.DatabaseServices;
-using Ed = Autodesk.AutoCAD.EditorInput;
 
 namespace PlotWizard
 {
@@ -21,8 +15,9 @@ namespace PlotWizard
         public static double ViewportScaling { get; set; }
         public static double ContentScaling { get; set; }
 
-        private RibbonTextBox tbViewportScaling;
-        private RibbonTextBox tbContentScaling;
+        private RibbonTextBox tbViewportScaling; // <--------------
+        private RibbonTextBox tbContentScaling;  // <--------------
+
         private RibbonTextBox tbBlockName;
         private RibbonTextBox tbPrefix;
         private RibbonTextBox tbPostfix;

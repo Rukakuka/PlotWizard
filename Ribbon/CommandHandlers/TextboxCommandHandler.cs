@@ -17,6 +17,7 @@ namespace PlotWizard.Ribbon.CommandHandlers
             {
                 switch (tb.Id)
                 {
+                    /*
                     case "tbBlockName":
                         RibbonCommands.BlockName = tb.TextValue;
                         break;
@@ -26,6 +27,7 @@ namespace PlotWizard.Ribbon.CommandHandlers
                     case "tbPostfix":
                         RibbonCommands.Postfix = tb.TextValue;
                         break;
+                        */
                     case "tbViewportScaling":
                         try
                         {

@@ -89,8 +89,7 @@ namespace PlotWizard
         }
         private static bool CheckForDuplicates(string layoutName)
         {
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Database db = doc.Database;
+            Database db = Application.DocumentManager.MdiActiveDocument.Database;
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
                 DBDictionary laytDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;

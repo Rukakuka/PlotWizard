@@ -60,7 +60,6 @@ namespace PlotWizard
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception e)
                 {
-                    //Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
                     System.Windows.MessageBox.Show("From @CreateAndMakeLayoutCurrent\n" + e.ToString());
                 }
             }
@@ -286,7 +285,7 @@ namespace PlotWizard
         {
             if (!String.IsNullOrEmpty(str))
             {
-                List<String> forbiddenSymbols = new List<String> {"\\", "<" , ">", "/", ",", "`",
+                List<string> forbiddenSymbols = new List<string> {"\\", "<" , ">", "/", ",", "`",
                                                               "?", ":", ";", "*", "|", "="};
                 foreach (var forbiddenSymbol in forbiddenSymbols)
                     str = str.Replace(forbiddenSymbol, " ");
