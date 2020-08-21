@@ -74,6 +74,8 @@ namespace PlotWizard
             PlotProgressDialog plotProcessDialog = new PlotProgressDialog(false, sheetCount, true);
 
             int numSheet = 1;
+
+            
             foreach (ObjectId btrId in layoutsToPlot)
             {
                 Layout layout = new Layout();

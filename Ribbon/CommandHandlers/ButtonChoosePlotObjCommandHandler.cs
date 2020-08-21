@@ -60,45 +60,41 @@ namespace PlotWizard.Ribbon.CommandHandlers
                 BlockReference br = tr.GetObject(objId, OpenMode.ForRead) as BlockReference;
                 ed.WriteMessage($"\nВыбран блок '{br.Name}'.\n");
 
-                RibbonCommands.BlockName = br.Name;
-
-                RibbonTab tab = FindRibbonTab(RibbonCommands.TargetTabName);
+                RibbonTab tab = FindRibbonTabByName(RibbonCommands.TargetTabName);
 
                 if (tab == null)
                     throw new ArgumentNullException($"Tab not found: {RibbonCommands.TargetTabName}");
 
                 var textbox = tab.FindItem("tbBlockName") as RibbonTextBox;
-                textbox.TextValue = RibbonCommands.BlockName;
+                textbox.TextValue = br.Name;
 
                 List<string> attrCollection = ParseAttributes(tr, br.AttributeCollection);
 
-                Ribbon.AttributeSelector attrSelector = new Ribbon.AttributeSelector(attrCollection);
+                Ribbon.AttributeSelectorWindow attrSelector = new AttributeSelectorWindow(attrCollection);
+                
                 attrSelector.ShowDialog();
-
-                RibbonCommands.Prefix = attrSelector.Prefix;
-                RibbonCommands.Postfix = attrSelector.Postfix;
 
                 textbox = tab.FindItem("tbPrefix") as RibbonTextBox;
                 if (textbox != null)
                 {
-                    textbox.TextValue = RibbonCommands.Prefix;
+                    textbox.TextValue = AttributeSelectorSettings.Prefix;
                 }
+
                 textbox = tab.FindItem("tbPostfix") as RibbonTextBox;
                 if (textbox != null)
                 {
-                    textbox.TextValue = RibbonCommands.Postfix;
+                    textbox.TextValue = AttributeSelectorSettings.Postfix;
                 }
-                
-                Wizard.TargetBlockName = RibbonCommands.BlockName;
-                Wizard.Prefix = RibbonCommands.Prefix;
-                Wizard.Postfix = RibbonCommands.Postfix;
 
+                Wizard.Prefix = AttributeSelectorSettings.Prefix;
+                Wizard.Postfix = AttributeSelectorSettings.Postfix;
+                Wizard.TargetBlockName = br.Name;
                 Wizard.MaxCornerPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
                 Wizard.MinCornerPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
                 tr.Commit();
             }
         }
-        private RibbonTab FindRibbonTab(string name)
+        private RibbonTab FindRibbonTabByName(string name)
         {
             Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
             foreach (var tab in ribbon.Tabs)

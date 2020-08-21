@@ -228,28 +228,24 @@ namespace PlotWizard
             // vp.ViewHeight *= 1.1, for instance)
             vp.CustomScale *= fac;
         }
-        public static Dictionary<string, string> GetMediaNameList()
+        public static Dictionary<string, string> GetMediaNameList(string plotterType)
         {
-            //Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-            Dictionary<string, string> media = new Dictionary<string, string>();
-            try
+            if (String.IsNullOrEmpty(plotterType) || String.IsNullOrWhiteSpace(plotterType))
             {
-                Autodesk.AutoCAD.PlottingServices.PlotConfig pltConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig;
-                pltConfig.RefreshMediaNameList();
-                //ed.WriteMessage("\nCurrent Plotter: " + pltConfig.DeviceName);
-                foreach (string canonicalName in pltConfig.CanonicalMediaNames)
-                {
-                    string localName = pltConfig.GetLocalMediaName(canonicalName);
-                    if (!media.ContainsKey(localName))
-                    {
-                        media.Add(localName, canonicalName);
-                    }
-                }
+                System.Windows.MessageBox.Show("Tried to configure PlotConfigManager with empty plotter name!");
+                throw new ArgumentNullException();
             }
-            catch (System.Exception e)
+            Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(plotterType);
+            Dictionary<string, string> media = new Dictionary<string, string>();
+            Autodesk.AutoCAD.PlottingServices.PlotConfig pltConfig = Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig;
+            pltConfig.RefreshMediaNameList();
+            foreach (string canonicalName in pltConfig.CanonicalMediaNames)
             {
-                System.Windows.MessageBox.Show("Extensions::GetMediaNameList() Exception thrown:\n" +
-                    e.ToString());
+                string localName = pltConfig.GetLocalMediaName(canonicalName);
+                if (!media.ContainsKey(localName))
+                {
+                    media.Add(localName, canonicalName);
+                }
             }
             return media;
         }

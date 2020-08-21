@@ -4,20 +4,29 @@ using System.Windows.Forms;
 
 namespace PlotWizard.Ribbon
 {
-    public partial class AttributeSelector : Form
+    public partial class AttributeSelectorWindow : Form
     {
-        internal string Prefix { get; private set; }
-        internal string Postfix { get; private set; }
-
-        public AttributeSelector(List<string> attrCollection)
+        public AttributeSelectorWindow(List<string> attrCollection)
         {
             InitializeComponent();
             FillListBoxes(attrCollection);
+            //FillDataGridSortingOrder(); // <----------- Implement
         }
+        private void FillDataGridSortingOrder()
+        {
+            dataGridSortingOrder.Rows.Add(new object[] { "+Y, +X", Properties.Resources.icon_axes01 });
+            dataGridSortingOrder.Rows.Add(new object[] { "+X, -Y", Properties.Resources.icon_axes02 });
+            dataGridSortingOrder.Rows.Add(new object[] { "-Y, -X", Properties.Resources.icon_axes03 });
+            dataGridSortingOrder.Rows.Add(new object[] { "-X, +Y", Properties.Resources.icon_axes04 });
+            dataGridSortingOrder.Rows.Add(new object[] { "+X, +Y", Properties.Resources.icon_axes05 });
+        }
+
         private void ButtonOk_Click(object sender, EventArgs e)
         {
-            Wizard.Prefix = this.Prefix;
-            Wizard.Postfix = this.Postfix;
+            AttributeSelectorSettings.Prefix = listBoxPrefix.Text.Equals("None") ? AttributeSelectorSettings.defaultPrefix : listBoxPrefix.Text;
+            AttributeSelectorSettings.Postfix = listBoxPostfix.Text.Equals("None") ? AttributeSelectorSettings.defaultPostfix : listBoxPostfix.Text;
+            //AttributeSelectorSettings.SortingOrder = ;
+
             Close();
         }
         private void FillListBoxes(List<string> list)
@@ -35,6 +44,7 @@ namespace PlotWizard.Ribbon
             listBoxPrefix.SelectedIndex = 0;
             listBoxPostfix.SelectedIndex = 0;
         }
+        /*
         private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (sender is ListBox lb)
@@ -52,5 +62,6 @@ namespace PlotWizard.Ribbon
                 }
             }
         }
+        */
     }
 }

@@ -21,20 +21,11 @@ namespace PlotWizard
         public static Point3d MinCornerPoint { get; set; }
         public static string Prefix { get; set; }
         public static string Postfix { get; set; }
-        public static double ViewportScaling { get; set; }
-        public static double ContentScaling { get; set; }
-        public static string Plotter { get; set; }
-        public static string PageSize { get; set; }
         private static ObjectIdCollection Layouts { get; set; } 
-        private const string MyPageStyle = "acad.ctb";
-
+       
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
         public static void Plotwizard()
         {
-            Plotter = "DWG To PDF.pc3";
-            PageSize = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
-            ContentScaling = 1.003;
-            ViewportScaling = 1;
             Layouts = new ObjectIdCollection(); // stores the newly-created layouts
             AddMyRibbonPanel();
         }
@@ -49,13 +40,19 @@ namespace PlotWizard
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetPlotObjects(TargetBlockName, MinCornerPoint, MaxCornerPoint);
+                List<PlotObject> plotObjects = GetPlotObjects(TargetBlockName, MinCornerPoint, MaxCornerPoint, new SortingOrder(1, 1, false));
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
 
                 foreach (var plotObject in plotObjects)
                 {
-                    ObjectId lay = lc.CreateMyLayout(PageSize, ViewportScaling, ContentScaling, MyPageStyle, Plotter, plotObject);
+                    ObjectId lay = lc.CreateMyLayout(Ribbon.LayoutSettings.PageSize.Value,
+                                                     Ribbon.LayoutSettings.ViewportScaling,
+                                                     Ribbon.LayoutSettings.ContentScaling,
+                                                     "acad.ctb",
+                                                     Ribbon.LayoutSettings.PlotterType,
+                                                     plotObject);
+
                     if (!lay.IsNull)
                         Layouts.Add(lay);
                 }
@@ -91,7 +88,10 @@ namespace PlotWizard
                 doc.Editor.WriteMessage("\nОтмена.\n");
                 return;
             }
-            MultiSheetPlot.MultiSheetPlotter(PageSize, Plotter, saveFileDialog.FileName, Layouts);
+            MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.PageSize.Value,
+                                             Ribbon.LayoutSettings.PlotterType,
+                                             saveFileDialog.FileName,
+                                             Layouts);
         }
 
         [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
@@ -102,11 +102,11 @@ namespace PlotWizard
         }
         private static string GetInitialFilename(ObjectIdCollection layouts)
         {
-            string filename = "";
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
             Transaction tr = db.TransactionManager.StartTransaction();
 
+            string filename;
             if (layouts != null && !layouts.IsDisposed && layouts.Count > 0)
             {
                 try
@@ -129,11 +129,11 @@ namespace PlotWizard
 
         private static void AddMyRibbonPanel()
         {
-            RibbonCommands rbCommands = new RibbonCommands();
+            Ribbon.RibbonCommands rbCommands = new Ribbon.RibbonCommands();
             rbCommands.AddMyRibbonPanel();
         }
 
-        private static List<PlotObject> GetPlotObjects(String targetBlockName, Point3d minCornerPoint, Point3d maxCornerPoint)
+        private static List<PlotObject> GetPlotObjects(String targetBlockName, Point3d minCornerPoint, Point3d maxCornerPoint, SortingOrder sortingOrder)
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -186,14 +186,17 @@ namespace PlotWizard
                         plotObjects.Add(obj);
                     }
                 }
-                plotObjects = SortPlotObjectsByCoordinates(plotObjects);
+                plotObjects = SortPlotObjectsByCoordinates(plotObjects, sortingOrder);
                 tr.Commit();
             }
             return plotObjects;
         }
 
-        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects)
+        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects, SortingOrder _)
         {
+
+            // TODO : implement sorting order
+
             var sortedList = new List<PlotObject>();
             int position;
 

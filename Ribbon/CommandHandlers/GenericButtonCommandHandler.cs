@@ -4,7 +4,7 @@ using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace PlotWizard.Ribbon.CommandHandlers
 {
-    internal class ButtonCommandHandler : System.Windows.Input.ICommand
+    internal class GenericButtonCommandHandler : System.Windows.Input.ICommand
     {
 
         public event EventHandler CanExecuteChanged;
