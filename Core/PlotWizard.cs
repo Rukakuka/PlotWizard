@@ -24,7 +24,8 @@ namespace PlotWizard
     }
     public static class Wizard
     {        
-        public static ObjectIdCollection Layouts { get; set; } 
+        public static ObjectIdCollection Layouts { get; set; }
+        public static ObjectIdCollection PureLayouts { get; set; }
         public static void CreateLayouts()
         {
             Ap.Document doc = Ap.Core.Application.DocumentManager.MdiActiveDocument;
@@ -52,7 +53,10 @@ namespace PlotWizard
                                                      plotObject);
 
                     if (!lay.IsNull)
+                    {
                         Layouts.Add(lay);
+                        PureLayouts.Add(lay);
+                    }
                 }
                 
                 doc.Editor.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
@@ -61,41 +65,53 @@ namespace PlotWizard
         }
         public static void MultiPlot()
         {
-            var doc = acad.DocumentManager.MdiActiveDocument;
-            
-            if (doc == null)
-                return;
-            if (Layouts == null || Layouts.IsDisposed || Layouts.Count == 0)
+            try
             {
-                System.Windows.MessageBox.Show("Нет страниц для печати. Пропущено.");
-                return;
+                var doc = acad.DocumentManager.MdiActiveDocument;
+
+                if (doc == null)
+                    return;
+                if (Layouts == null || Layouts.IsDisposed || Layouts.Count == 0)
+                {
+                    System.Windows.MessageBox.Show("Нет страниц для печати. Пропущено.");
+                    return;
+                }
+
+                Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Ribbon.LayoutSettings.PlotterType);
+
+                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "Вывод в файл",
+                    Filter = $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
+                                $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}",
+                    FileName = GetInitialFilename(Layouts)
+                };
+
+                bool? result = saveFileDialog.ShowDialog();
+
+                if (!result.HasValue || !result.Value)
+                {
+                    doc.Editor.WriteMessage("\nОтмена.\n");
+                    return;
+                }
+                ObjectIdCollection AllLayouts = Layouts;
+
+
+                MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.PageSize.Value,
+                                                 Ribbon.LayoutSettings.PlotterType,
+                                                 saveFileDialog.FileName,
+                                                 AllLayouts,
+                                                 PureLayouts);
             }
-            Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Ribbon.LayoutSettings.PlotterType);
-
-            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            catch (Exception e)
             {
-                Title = "Вывод в файл",
-                Filter = $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DeviceName}|*" +
-                            $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}",
-                FileName = GetInitialFilename(Layouts)
-            };
-
-            bool? result = saveFileDialog.ShowDialog();
-
-            if (!result.HasValue || !result.Value)
-            {
-                doc.Editor.WriteMessage("\nОтмена.\n");
-                return;
+                System.Windows.MessageBox.Show(e.ToString());
             }
-            MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.PageSize.Value,
-                                             Ribbon.LayoutSettings.PlotterType,
-                                             saveFileDialog.FileName,
-                                             Layouts);
         }
         public static void EraseAllLayouts()
         {
             LayoutCommands.EraseAllLayouts();
-            Layouts.Clear();
+            PureLayouts.Clear();
         }
         private static string GetInitialFilename(ObjectIdCollection layouts)
         {

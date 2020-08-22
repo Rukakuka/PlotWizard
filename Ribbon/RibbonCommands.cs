@@ -57,6 +57,7 @@ namespace PlotWizard.Ribbon
             }
             
             Wizard.Layouts = new ObjectIdCollection(); // stores the newly-created layouts
+            Wizard.PureLayouts = new ObjectIdCollection();
 
             RibbonLabel labelBlockName = new RibbonLabel
             {

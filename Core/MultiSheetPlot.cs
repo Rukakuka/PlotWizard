@@ -8,14 +8,14 @@ namespace PlotWizard
 {
     public static class MultiSheetPlot
     {
-        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName, ObjectIdCollection layouts)
+        public static void MultiSheetPlotter(String pageSize, String plotter, String outputFileName, ObjectIdCollection allLayouts, ObjectIdCollection pureLayouts)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
             Database db = doc.Database;
             Transaction tr = db.TransactionManager.StartTransaction();
 
-            PlotInfo  plotInfo = new PlotInfo();
+            PlotInfo plotInfo = new PlotInfo();
             PlotInfoValidator plotInfoValidator = new PlotInfoValidator
             {
                 MediaMatchingPolicy = MatchingPolicy.MatchEnabled
@@ -26,7 +26,7 @@ namespace PlotWizard
                 tr.Commit();
                 return;
             }
-
+            
             PlotEngine plotEngine = PlotFactory.CreatePublishEngine();
 
             // Collect all the paperspace layouts
@@ -42,13 +42,13 @@ namespace PlotWizard
             //    }
             //}
 
-            if (layouts == null || layouts.IsDisposed)
+            if (allLayouts == null || allLayouts.IsDisposed)
             {
                 System.Windows.MessageBox.Show("\nОбъект печати пуст Пропущено.\n");
                 tr.Commit();
                 return;
             }
-            if (layouts.Count == 0)
+            if (allLayouts.Count == 0)
             {
                 System.Windows.MessageBox.Show("\nКоличество листов для печати равно нулю. Пропущено.\n");
                 tr.Commit();
@@ -59,7 +59,7 @@ namespace PlotWizard
             Layout lay;
             ObjectIdCollection layoutsToPlot = new ObjectIdCollection();
 
-            foreach (ObjectId btrId in layouts)
+            foreach (ObjectId btrId in allLayouts)
             {
                 try
                 {
@@ -74,10 +74,18 @@ namespace PlotWizard
                 layoutsToPlot.Add(lay.ObjectId);
                 sheetCount++;
             }
-
-            System.Windows.MessageBox.Show(layoutsToPlot.Count + " " + sheetCount);
-
-
+            /*
+            ed.WriteMessage("CLEARED\n");
+            foreach (var id in layoutsToPlot)
+            {
+                ed.WriteMessage(id.ToString() +"\n");
+            }
+            ed.WriteMessage("PURE\n");
+            foreach (var id in pureLayouts)
+            {
+                ed.WriteMessage(id.ToString() + "\n");
+            }
+            */
             PlotProgressDialog plotProcessDialog = new PlotProgressDialog(false, sheetCount, true);
             int numSheet = 1;
             using (doc.LockDocument())
@@ -129,7 +137,7 @@ namespace PlotWizard
                     plotProcessDialog.SheetProgressPos = 0;
 
                     PlotPageInfo plotPageInfo = new PlotPageInfo();
-                    plotEngine.BeginPage(plotPageInfo, plotInfo, (numSheet == layouts.Count), null);
+                    plotEngine.BeginPage(plotPageInfo, plotInfo, (numSheet == allLayouts.Count), null);
 
                     plotEngine.BeginGenerateGraphics(null);
                     plotProcessDialog.SheetProgressPos = 50;
