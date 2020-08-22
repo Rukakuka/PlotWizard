@@ -13,7 +13,7 @@ namespace PlotWizard
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
             Database db = doc.Database;
-            Transaction tr = db.TransactionManager.StartTransaction();
+            Transaction tr = db.TransactionManager.StartTransaction(); // <--- TODO fix NullReferenceException 
 
             PlotInfo plotInfo = new PlotInfo();
             PlotInfoValidator plotInfoValidator = new PlotInfoValidator
