@@ -20,7 +20,6 @@ namespace PlotWizard
         public static void Plotwizard()
         {
             new Ribbon.RibbonCommands().AddMyRibbonPanel();
-            Wizard.Layouts = new ObjectIdCollection(); // stores the newly-created layouts
         }
     }
     public static class Wizard
@@ -28,7 +27,6 @@ namespace PlotWizard
         public static ObjectIdCollection Layouts { get; set; } 
         public static void CreateLayouts()
         {
-
             Ap.Document doc = Ap.Core.Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 return;
@@ -61,19 +59,18 @@ namespace PlotWizard
             }
             doc.Editor.Regen();
         }
-
-        [Rt.CommandMethod("MULTIPLOT", Rt.CommandFlags.Modal)]
         public static void MultiPlot()
         {
             var doc = acad.DocumentManager.MdiActiveDocument;
+            
             if (doc == null)
                 return;
-
             if (Layouts == null || Layouts.IsDisposed || Layouts.Count == 0)
             {
-                System.Windows.MessageBox.Show("Нет объектов для печати. Пропущено.");
+                System.Windows.MessageBox.Show("Нет страниц для печати. Пропущено.");
                 return;
             }
+            Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Ribbon.LayoutSettings.PlotterType);
 
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
@@ -82,6 +79,7 @@ namespace PlotWizard
                             $"{Autodesk.AutoCAD.PlottingServices.PlotConfigManager.CurrentConfig.DefaultFileExtension}",
                 FileName = GetInitialFilename(Layouts)
             };
+
             bool? result = saveFileDialog.ShowDialog();
 
             if (!result.HasValue || !result.Value)
@@ -115,11 +113,13 @@ namespace PlotWizard
                 }
                 catch (Exception e)
                 {
+                    System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nУказанная страница отсуствует в БД чертежа.");
                     return "";
                 }
             }
             else
             {
+                System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nНет страниц для печати.");
                 return "";
             }
             tr.Commit();

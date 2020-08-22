@@ -134,6 +134,7 @@
     <Compile Include="Ribbon\CommandHandlers\ButtonChoosePlotObjCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\ButtonCreateLayoutsCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\ButtonEraseLayoutsCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\ButtonMultiPlotCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\GenericButtonCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\ButtonLayoutSettingsCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\GenericTextboxCommandHandler.cs" />

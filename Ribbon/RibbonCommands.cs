@@ -1,7 +1,18 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+
+using acad = Autodesk.AutoCAD.ApplicationServices.Application;
+using Ap = Autodesk.AutoCAD.ApplicationServices;
+using Ed = Autodesk.AutoCAD.EditorInput;
+using Rt = Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
-using System;
+
 
 namespace PlotWizard.Ribbon
 {
@@ -43,7 +54,9 @@ namespace PlotWizard.Ribbon
             {
                 System.Windows.MessageBox.Show("Вкладка уже добавлена");
                 return;
-            } 
+            }
+            
+            Wizard.Layouts = new ObjectIdCollection(); // stores the newly-created layouts
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
@@ -153,8 +166,7 @@ namespace PlotWizard.Ribbon
             };
             btnMultiPlot = new Autodesk.Windows.RibbonButton
             {
-                CommandParameter = "MULTIPLOT",
-                CommandHandler = new Ribbon.CommandHandlers.GenericButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonMultiPlotCommandHandler(),
                 Text = "Печать",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_18),
