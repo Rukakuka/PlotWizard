@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Autodesk.Windows;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace PlotWizard.Ribbon.CommandHandlers
 {
-    internal class ButtonLayoutSettingsCommandHandler : System.Windows.Input.ICommand
+    class ButtonCreateLayoutsCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
         public bool CanExecute(object param)
@@ -16,7 +14,7 @@ namespace PlotWizard.Ribbon.CommandHandlers
         {
             if (!(parameter is RibbonCommandItem))
                 throw new TypeAccessException();
-           new LayoutSettingsWindow().Show();
+            Wizard.CreateLayouts();
         }
     }
 }

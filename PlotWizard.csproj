@@ -124,17 +124,19 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Other\RegionPlot.cs" />
-    <Compile Include="Ribbon\AttributeSelector\AttributeSelectorSettings.cs" />
-    <Compile Include="Ribbon\AttributeSelector\AttributeSelectorWindow.cs">
+    <Compile Include="Ribbon\BlockSelector\BlockSelectorSettings.cs" />
+    <Compile Include="Ribbon\BlockSelector\BlockSelectorWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Ribbon\AttributeSelector\AttributeSelectorWindow.Designer.cs">
-      <DependentUpon>AttributeSelectorWindow.cs</DependentUpon>
+    <Compile Include="Ribbon\BlockSelector\BlockSelectorWindow.Designer.cs">
+      <DependentUpon>BlockSelectorWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Ribbon\CommandHandlers\ButtonChoosePlotObjCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\ButtonCreateLayoutsCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\ButtonEraseLayoutsCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\GenericButtonCommandHandler.cs" />
     <Compile Include="Ribbon\CommandHandlers\ButtonLayoutSettingsCommandHandler.cs" />
-    <Compile Include="Ribbon\CommandHandlers\TextboxCommandHandler.cs" />
+    <Compile Include="Ribbon\CommandHandlers\GenericTextboxCommandHandler.cs" />
     <Compile Include="Ribbon\LayoutSettings\LayoutSettingsWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -161,8 +163,8 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Ribbon\AttributeSelector\AttributeSelectorWindow.resx">
-      <DependentUpon>AttributeSelectorWindow.cs</DependentUpon>
+    <EmbeddedResource Include="Ribbon\BlockSelector\BlockSelectorWindow.resx">
+      <DependentUpon>BlockSelectorWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ribbon\LayoutSettings\LayoutSettingsWindow.resx">
       <DependentUpon>LayoutSettingsWindow.cs</DependentUpon>

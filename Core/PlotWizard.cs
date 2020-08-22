@@ -10,40 +10,40 @@ using Ed = Autodesk.AutoCAD.EditorInput;
 using Rt = Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 
-[assembly: Rt.CommandClass(typeof(PlotWizard.Wizard))]
+[assembly: Rt.CommandClass(typeof(PlotWizard.WizardInitializer))]
 
 namespace PlotWizard
-{ 
-    public static class Wizard
-    {        
-        public static string TargetBlockName { get; set; }
-        public static Point3d MaxCornerPoint { get; set; }
-        public static Point3d MinCornerPoint { get; set; }
-        public static string Prefix { get; set; }
-        public static string Postfix { get; set; }
-        private static ObjectIdCollection Layouts { get; set; } 
-       
+{
+    public static class WizardInitializer
+    {
         [Rt.CommandMethod("PLOTWIZARD", Rt.CommandFlags.Modal)]
         public static void Plotwizard()
         {
-            Layouts = new ObjectIdCollection(); // stores the newly-created layouts
-            AddMyRibbonPanel();
+            new Ribbon.RibbonCommands().AddMyRibbonPanel();
+            Wizard.Layouts = new ObjectIdCollection(); // stores the newly-created layouts
         }
-
-        [Rt.CommandMethod("CREATELAYOUTS", Rt.CommandFlags.Modal)]
+    }
+    public static class Wizard
+    {        
+        public static ObjectIdCollection Layouts { get; set; } 
         public static void CreateLayouts()
         {
-            Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
+
+            Ap.Document doc = Ap.Core.Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 return;
-            Ed.Editor ed = doc.Editor;
 
             using (doc.LockDocument())
             {
-                List<PlotObject> plotObjects = GetPlotObjects(TargetBlockName, MinCornerPoint, MaxCornerPoint, new SortingOrder(1, 1, false));
+                List <PlotObject> plotObjects = GetPlotObjects(Ribbon.BlockSelectorSettings.TargetBlockName,
+                                                               Ribbon.BlockSelectorSettings.Prefix,
+                                                               Ribbon.BlockSelectorSettings.Postfix,
+                                                               Ribbon.BlockSelectorSettings.FirstCornerPoint,
+                                                               Ribbon.BlockSelectorSettings.SecondCornerPoint,
+                                                              new SortingOrder(1, 1, false));
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
-
+                
                 foreach (var plotObject in plotObjects)
                 {
                     ObjectId lay = lc.CreateMyLayout(Ribbon.LayoutSettings.PageSize.Value,
@@ -56,15 +56,16 @@ namespace PlotWizard
                     if (!lay.IsNull)
                         Layouts.Add(lay);
                 }
-                ed.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
+                
+                doc.Editor.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
             }
-            ed.Regen();
+            doc.Editor.Regen();
         }
 
         [Rt.CommandMethod("MULTIPLOT", Rt.CommandFlags.Modal)]
         public static void MultiPlot()
         {
-            var doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            var doc = acad.DocumentManager.MdiActiveDocument;
             if (doc == null)
                 return;
 
@@ -93,8 +94,6 @@ namespace PlotWizard
                                              saveFileDialog.FileName,
                                              Layouts);
         }
-
-        [Rt.CommandMethod("ERASEALLLAYOUTS", Rt.CommandFlags.Modal)]
         public static void EraseAllLayouts()
         {
             LayoutCommands.EraseAllLayouts();
@@ -105,7 +104,7 @@ namespace PlotWizard
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
             Transaction tr = db.TransactionManager.StartTransaction();
-
+            
             string filename;
             if (layouts != null && !layouts.IsDisposed && layouts.Count > 0)
             {
@@ -126,14 +125,12 @@ namespace PlotWizard
             tr.Commit();
             return filename;
         }
-
-        private static void AddMyRibbonPanel()
-        {
-            Ribbon.RibbonCommands rbCommands = new Ribbon.RibbonCommands();
-            rbCommands.AddMyRibbonPanel();
-        }
-
-        private static List<PlotObject> GetPlotObjects(String targetBlockName, Point3d minCornerPoint, Point3d maxCornerPoint, SortingOrder sortingOrder)
+        private static List<PlotObject> GetPlotObjects(string targetBlockName,
+                                                       string prefix,
+                                                       string postfix,
+                                                       Point3d maxCornerPoint,
+                                                       Point3d minCornerPoint,
+                                                       SortingOrder sortingOrder)
         {
             Document doc = acad.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -164,7 +161,7 @@ namespace PlotWizard
                     PlotObject obj = new PlotObject();
                     if (bounds.HasValue)
                         obj.Extents = bounds.Value; // Extensions.Strip(bounds.Value);
-
+                    
                     if (obj.Extents.MaxPoint.X <= maxCornerPoint.X &&
                         obj.Extents.MaxPoint.Y <= maxCornerPoint.Y &&
                         obj.Extents.MinPoint.X >= minCornerPoint.X &&
@@ -176,11 +173,11 @@ namespace PlotWizard
                             var attribute = tr.GetObject(attributeId, OpenMode.ForRead) as AttributeReference;
                             if (attribute == null)
                                 continue;
-                            if (attribute.Tag.Contains(Prefix))
+                            if (attribute.Tag.Equals(prefix, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 obj.Prefix = attribute.TextString;
                             }
-                            if (attribute.Tag.Equals(Postfix, StringComparison.CurrentCultureIgnoreCase))
+                            if (attribute.Tag.Equals(postfix, StringComparison.CurrentCultureIgnoreCase))
                                 obj.Postfix = attribute.TextString;
                         }
                         plotObjects.Add(obj);
@@ -192,7 +189,7 @@ namespace PlotWizard
             return plotObjects;
         }
 
-        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects, SortingOrder _)
+        private static List<PlotObject> SortPlotObjectsByCoordinates(List<PlotObject> plotObjects, SortingOrder order)
         {
 
             // TODO : implement sorting order

@@ -12,5 +12,13 @@ namespace PlotWizard
             Ysign = ysign;
             SwitchAxes = switchAxes;
         }
+        public static SortingOrder ToSortingOrder(int listViewIndex)
+        {
+            return new SortingOrder(1, 1, false);
+        }
+        public static int ToListViewIndex(SortingOrder order)
+        {
+            return 0;
+        }
     }
 }

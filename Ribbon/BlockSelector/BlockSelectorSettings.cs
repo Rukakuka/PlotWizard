@@ -1,7 +1,8 @@
-﻿
+﻿using Autodesk.AutoCAD.Geometry;
+
 namespace PlotWizard.Ribbon
 {
-    class AttributeSelectorSettings
+    class BlockSelectorSettings
     {
         public static string defaultPrefix { get; set; } = "";
         public static string defaultPostfix { get; set; } = "";
@@ -9,6 +10,9 @@ namespace PlotWizard.Ribbon
         public static string Prefix { get; set; } = null;
         public static string Postfix { get; set; } = null;
         public static SortingOrder SortingOrder { get; set; } = null;
+        public static Point3d FirstCornerPoint { get; set; } = new Point3d(0, 0, 0);
+        public static Point3d SecondCornerPoint { get; set; } = new Point3d(0, 0, 0);
+        public static string TargetBlockName { get; set; } = null;
         public static void SetDefaults()
         {
             SortingOrder = defaultSortingOrder;

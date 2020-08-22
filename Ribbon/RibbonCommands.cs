@@ -7,7 +7,7 @@ namespace PlotWizard.Ribbon
 {
     internal class RibbonCommands : IExtensionApplication
     {
-        public  const string TargetTabName = "Вывод";
+        public const string TargetTabName = "Вывод";
         private const string TargetPanelName = "Печать блоков";
 
         private RibbonTextBox tbBlockName;
@@ -25,21 +25,25 @@ namespace PlotWizard.Ribbon
         public void Terminate() { }
         public void AddMyRibbonPanel()
         {
-            Autodesk.Windows.RibbonControl ribbon = ComponentManager.Ribbon;
-            foreach (var tab in ribbon.Tabs)
+            RibbonTab targetTab = null;
+            foreach (var tab in ComponentManager.Ribbon.Tabs)
             {
                 if (tab.Title.Equals(TargetTabName))
                 {
+                    targetTab = tab;
                     foreach (var panel in tab.Panels)
                     {
                         if (panel.Source.Title.Equals(TargetPanelName))
-                        {
-                            System.Windows.MessageBox.Show("Вкладка уже добавлена");
-                            return;
-                        }
+                            break;
                     }
                 }
             }
+
+            if (targetTab == null)
+            {
+                System.Windows.MessageBox.Show("Вкладка уже добавлена");
+                return;
+            } 
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
@@ -59,7 +63,6 @@ namespace PlotWizard.Ribbon
                 Image = Extensions.GetBitmap(Properties.Resources.icon_20),
                 Height = 22
             };
-            
             RibbonLabel labelPostfix = new RibbonLabel
             {
                 ToolTip = "Имя атрибута - постфикс  ",
@@ -69,7 +72,6 @@ namespace PlotWizard.Ribbon
                 Size = RibbonItemSize.Standard,
                 Image = Extensions.GetBitmap(Properties.Resources.icon_19)
             };
-
             tbBlockName = new RibbonTextBox
             {
                 Id = "tbBlockName",
@@ -78,14 +80,13 @@ namespace PlotWizard.Ribbon
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.GenericTextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
                 IsEnabled = false,
                 Text = "",
             };
-
             tbPrefix = new RibbonTextBox
             {
                 Id = "tbPrefix",
@@ -94,14 +95,13 @@ namespace PlotWizard.Ribbon
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.GenericTextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
                 IsEnabled = false,
                 Text = ""
             };
-
             tbPostfix = new RibbonTextBox
             {
                 ToolTip = "Имя атрибута - постфикс  ",
@@ -110,14 +110,13 @@ namespace PlotWizard.Ribbon
                 IsEmptyTextValid = false,
                 AcceptTextOnLostFocus = true,
                 InvokesCommand = true,
-                CommandHandler = new Ribbon.CommandHandlers.TextboxCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.GenericTextboxCommandHandler(),
                 Width = 100,
                 Height = 22,
                 Size = RibbonItemSize.Large,
                 IsEnabled = false,
                 Text = ""
             };
-
             btnChooseBlock = new Autodesk.Windows.RibbonButton
             {
                 CommandHandler = new Ribbon.CommandHandlers.ButtonChoosePlotObjCommandHandler(),
@@ -129,24 +128,21 @@ namespace PlotWizard.Ribbon
                 Width = 65,
                 MinWidth = 65
             };
-
             btnCreateLayouts = new Autodesk.Windows.RibbonButton
             {
-                CommandParameter = "CREATELAYOUTS",
-                CommandHandler = new Ribbon.CommandHandlers.GenericButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonCreateLayoutsCommandHandler(),
                 Text = "Создать\nлисты",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_15),
                 Size = RibbonItemSize.Large,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
                 Width = 65,
-                MinWidth = 65
+                MinWidth = 65,
+                
             };
-
             btnEraseLayouts = new Autodesk.Windows.RibbonButton
             {
-                CommandParameter = "ERASEALLLAYOUTS",
-                CommandHandler = new Ribbon.CommandHandlers.GenericButtonCommandHandler(),
+                CommandHandler = new Ribbon.CommandHandlers.ButtonEraseLayoutsCommandHandler(),
                 Text = "Удалить\nлисты",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_16),
@@ -155,7 +151,6 @@ namespace PlotWizard.Ribbon
                 Width = 65,
                 MinWidth = 65
             };
-
             btnMultiPlot = new Autodesk.Windows.RibbonButton
             {
                 CommandParameter = "MULTIPLOT",
@@ -167,7 +162,6 @@ namespace PlotWizard.Ribbon
                 Orientation = System.Windows.Controls.Orientation.Vertical,
                 MinWidth = 65
             };
-
             btnLayoutSettings = new Autodesk.Windows.RibbonButton
             {
                 CommandHandler = new Ribbon.CommandHandlers.ButtonLayoutSettingsCommandHandler(),
@@ -179,6 +173,7 @@ namespace PlotWizard.Ribbon
                 Width = 65,
                 MinWidth = 65
             };
+            
             Ribbon.LayoutSettings.SetDefaults();
 
             RibbonRowPanel row1 = new RibbonRowPanel();
@@ -187,7 +182,7 @@ namespace PlotWizard.Ribbon
             row1.Items.Add(labelPrefix);
             row1.Items.Add(new RibbonRowBreak());
             row1.Items.Add(labelPostfix);
-            
+
             RibbonRowPanel row2 = new RibbonRowPanel();
             row2.Items.Add(tbBlockName);
             row2.Items.Add(new RibbonRowBreak());
@@ -214,17 +209,8 @@ namespace PlotWizard.Ribbon
             panelSource.Items.Add(new RibbonSeparator());
             panelSource.Items.Add(btnMultiPlot);
 
-
-            foreach (var tab in ribbon.Tabs)
-            {
-                if (tab.Title.Equals(TargetTabName)) 
-                {
-                    tab.Panels.Add(plotWizardPanel);
-                    tab.IsActive = true;
-                    break;
-                }
-            }
+            targetTab.Panels.Add(plotWizardPanel);
+            targetTab.IsActive = true;
         }
     }
-
 }

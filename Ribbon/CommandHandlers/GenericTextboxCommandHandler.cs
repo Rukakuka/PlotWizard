@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace PlotWizard.Ribbon.CommandHandlers
 {
-    internal class TextboxCommandHandler : System.Windows.Input.ICommand
+    internal class GenericTextboxCommandHandler : System.Windows.Input.ICommand
     {
         public event EventHandler CanExecuteChanged;
 

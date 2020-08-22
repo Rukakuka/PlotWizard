@@ -1,6 +1,5 @@
 ﻿using System;
 using Autodesk.Windows;
-using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace PlotWizard.Ribbon.CommandHandlers
 {
@@ -17,7 +16,7 @@ namespace PlotWizard.Ribbon.CommandHandlers
         {
             if (parameter is RibbonCommandItem ribbonItem)
             {
-                var doc = acad.DocumentManager.MdiActiveDocument;
+                var doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
                 //Make sure the command text either ends with ";", or a " "
                 string cmdText = ((string)ribbonItem.CommandParameter).Trim();
                 if (!cmdText.EndsWith(";"))

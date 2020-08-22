@@ -33,7 +33,7 @@ namespace PlotWizard
                 // Consecutevly check if there is already a list with the same name, else add (1), (2) etc. to the name
                 string overridedLayoutName = layoutName;
                 int i = 1;
-                while (CheckForDuplicates(overridedLayoutName))
+                while (CheckForDuplicates(tr, overridedLayoutName))
                 {
                     overridedLayoutName = layoutName + $" ({i.ToString()})";
                     i++;
@@ -87,20 +87,18 @@ namespace PlotWizard
               !(min.X > 0 && min.Y > 0 && min.Z > 0 &&
                 max.X < 0 && max.Y < 0 && max.Z < 0);
         }
-        private static bool CheckForDuplicates(string layoutName)
+        private static bool CheckForDuplicates(Transaction tr, string layoutName)
         {
             Database db = Application.DocumentManager.MdiActiveDocument.Database;
-            using (Transaction tr = db.TransactionManager.StartTransaction())
+
+            DBDictionary layDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
+            // Iterate dictionary entries.
+            foreach (DBDictionaryEntry layName in layDict)
             {
-                DBDictionary laytDict = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
-                
-                // Iterate dictionary entries.
-                foreach (DBDictionaryEntry layName in laytDict)
+                if (layName.Key.Equals(layoutName))
                 {
-                    if (layName.Key.Equals(layoutName))
-                        return true;
+                    return true;
                 }
-                tr.Commit();
             }
             return false;
         }
@@ -108,32 +106,43 @@ namespace PlotWizard
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
-                return;
+                throw new Exception();
 
             Database db = doc.Database;
-            LayoutManager lm = LayoutManager.Current;
-
-            using (Transaction tr = db.TransactionManager.StartTransaction())
+            using (doc.LockDocument())
             {
-                DBDictionary layoutDictionary = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
-
-                // Iterate dictionary entries.
-                foreach (DBDictionaryEntry layout in layoutDictionary)
+                using (Transaction tr = db.TransactionManager.StartTransaction())
                 {
-                    string layoutName = layout.Key;
-                    if (layoutName != "Model" && layoutName != "Лист1")
+                    DBDictionary layoutDictionary;
+                    try
                     {
-                        try
+                        layoutDictionary = tr.GetObject(db.LayoutDictionaryId, OpenMode.ForWrite) as DBDictionary;
+                    }
+                    catch (Exception e)
+                    {
+                        System.Windows.MessageBox.Show(e.ToString());
+                        return;
+                    }
+                    LayoutManager lm = LayoutManager.Current;
+                    // Iterate dictionary entries.
+                    foreach (DBDictionaryEntry layout in layoutDictionary)
+                    {
+                        string layoutName = layout.Key;
+                        if (layoutName != "Model" && layoutName != "Лист1")
                         {
-                            lm.DeleteLayout(layoutName); // Delete layout.
-                        }
-                        catch (Exception e)
-                        {
-                            System.Windows.MessageBox.Show($"Tried to delete layout with name '{layoutName}' \n" + e.ToString());
+
+                            try
+                            {
+                                lm.DeleteLayout(layoutName); // Delete layout.
+                            }
+                            catch (Exception e)
+                            {
+                                System.Windows.MessageBox.Show($"Tried to delete layout with name '{layoutName}' \n" + e.ToString());
+                            }
                         }
                     }
+                    tr.Commit();
                 }
-                tr.Commit();
             }
         }
     }

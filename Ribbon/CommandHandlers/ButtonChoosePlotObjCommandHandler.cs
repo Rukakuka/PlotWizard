@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Autodesk.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
-using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Ap = Autodesk.AutoCAD.ApplicationServices;
 using Ed = Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -19,11 +18,12 @@ namespace PlotWizard.Ribbon.CommandHandlers
         public void Execute(object parameter)
         {
             if (!(parameter is RibbonCommandItem))
-                throw new TypeAccessException();
+                throw new Exception();
 
-            Ap.Document doc = acad.DocumentManager.MdiActiveDocument;
+            Ap.Document doc = Ap.Core.Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
-                throw new ArgumentNullException();
+                throw new Exception();
+
             Ed.Editor ed = doc.Editor;
 
             Ed.PromptPointOptions ppo = new Ed.PromptPointOptions("\nУкажите первый угол области печати: ")
@@ -53,45 +53,53 @@ namespace PlotWizard.Ribbon.CommandHandlers
 
             ObjectId objId = resource.ObjectId;
 
-            Database db = doc.Database;
-
-            using (Transaction tr = db.TransactionManager.StartTransaction())
+            using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
             {
                 BlockReference br = tr.GetObject(objId, OpenMode.ForRead) as BlockReference;
-                ed.WriteMessage($"\nВыбран блок '{br.Name}'.\n");
-
-                RibbonTab tab = FindRibbonTabByName(RibbonCommands.TargetTabName);
-
-                if (tab == null)
-                    throw new ArgumentNullException($"Tab not found: {RibbonCommands.TargetTabName}");
-
-                var textbox = tab.FindItem("tbBlockName") as RibbonTextBox;
-                textbox.TextValue = br.Name;
+                BlockSelectorSettings.TargetBlockName = br.Name;
 
                 List<string> attrCollection = ParseAttributes(tr, br.AttributeCollection);
 
-                Ribbon.AttributeSelectorWindow attrSelector = new AttributeSelectorWindow(attrCollection);
-                
-                attrSelector.ShowDialog();
+                Ribbon.BlockSelectorWindow blockSelector = new BlockSelectorWindow(attrCollection);
 
-                textbox = tab.FindItem("tbPrefix") as RibbonTextBox;
-                if (textbox != null)
+                if (blockSelector.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    textbox.TextValue = AttributeSelectorSettings.Prefix;
+                    BlockSelectorSettings.FirstCornerPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
+                    BlockSelectorSettings.SecondCornerPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
+                    RefreshRibbonBlockFields();
                 }
-
-                textbox = tab.FindItem("tbPostfix") as RibbonTextBox;
-                if (textbox != null)
+                else
                 {
-                    textbox.TextValue = AttributeSelectorSettings.Postfix;
+                    BlockSelectorSettings.FirstCornerPoint = BlockSelectorSettings.SecondCornerPoint  = new Point3d(0, 0, 0);
+                    BlockSelectorSettings.TargetBlockName = null;
                 }
+                blockSelector.Dispose();
+                tr.Commit(); 
+            }
+        } 
+        private void RefreshRibbonBlockFields()
+        {
+            RibbonTab tab = FindRibbonTabByName(RibbonCommands.TargetTabName);
 
-                Wizard.Prefix = AttributeSelectorSettings.Prefix;
-                Wizard.Postfix = AttributeSelectorSettings.Postfix;
-                Wizard.TargetBlockName = br.Name;
-                Wizard.MaxCornerPoint = new Point3d(first.X > second.X ? first.X : second.X, first.Y > second.Y ? first.Y : second.Y, 0);
-                Wizard.MinCornerPoint = new Point3d(first.X < second.X ? first.X : second.X, first.Y < second.Y ? first.Y : second.Y, 0);
-                tr.Commit();
+            if (tab == null)
+            {
+                System.Windows.MessageBox.Show($"Tab not found: {RibbonCommands.TargetTabName}");
+                return;
+            }
+            RibbonTextBox textbox = tab.FindItem("tbBlockName") as RibbonTextBox;
+            if (textbox != null)
+            {
+                textbox.TextValue = BlockSelectorSettings.TargetBlockName;
+            }
+             textbox = tab.FindItem("tbPrefix") as RibbonTextBox;
+            if (textbox != null)
+            {
+                textbox.TextValue = BlockSelectorSettings.Prefix;
+            }
+            textbox = tab.FindItem("tbPostfix") as RibbonTextBox;
+            if (textbox != null)
+            {
+                textbox.TextValue = BlockSelectorSettings.Postfix;
             }
         }
         private RibbonTab FindRibbonTabByName(string name)
@@ -104,7 +112,6 @@ namespace PlotWizard.Ribbon.CommandHandlers
             }
             return null;
         }
-
         private List<string> ParseAttributes(Transaction tr, AttributeCollection ac)
         {
             List<string> collection = new List<string>();
