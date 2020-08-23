@@ -23,10 +23,12 @@ namespace PlotWizard.Ribbon
         {
             BlockSelectorSettings.Prefix = listBoxPrefix.Text.Equals("(Нет)") ? BlockSelectorSettings.defaultPrefix : listBoxPrefix.Text;
             BlockSelectorSettings.Postfix = listBoxPostfix.Text.Equals("(Нет)") ? BlockSelectorSettings.defaultPostfix : listBoxPostfix.Text;
+
             if (listViewSortingOrder.SelectedIndices.Count != 0)
                 BlockSelectorSettings.SortingOrder = SortingOrder.ToSortingOrder(listViewSortingOrder.SelectedIndices[0]);
             else
-                BlockSelectorSettings.SortingOrder = new SortingOrder(1, 1, false);
+                BlockSelectorSettings.SortingOrder = BlockSelectorSettings.defaultSortingOrder;
+
             this.DialogResult = DialogResult.OK;
             Close();
         }

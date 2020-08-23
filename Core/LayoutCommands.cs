@@ -107,7 +107,7 @@ namespace PlotWizard
             Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
                 throw new Exception();
-
+            
             Database db = doc.Database;
             using (doc.LockDocument())
             {
@@ -141,6 +141,7 @@ namespace PlotWizard
                             }
                         }
                     }
+                    
                     tr.Commit();
                 }
             }

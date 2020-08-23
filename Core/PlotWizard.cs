@@ -25,10 +25,10 @@ namespace PlotWizard
     public static class Wizard
     {        
         public static ObjectIdCollection Layouts { get; set; }
-        public static ObjectIdCollection PureLayouts { get; set; }
         public static void CreateLayouts()
         {
-            Ap.Document doc = Ap.Core.Application.DocumentManager.MdiActiveDocument;
+            Document doc = acad.DocumentManager.MdiActiveDocument;
+
             if (doc == null || doc.IsDisposed)
                 return;
 
@@ -39,7 +39,7 @@ namespace PlotWizard
                                                                Ribbon.BlockSelectorSettings.Postfix,
                                                                Ribbon.BlockSelectorSettings.FirstCornerPoint,
                                                                Ribbon.BlockSelectorSettings.SecondCornerPoint,
-                                                              new SortingOrder(1, 1, false));
+                                                               Ribbon.BlockSelectorSettings.SortingOrder);
                 LayoutCommands lc = new LayoutCommands();
                 Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("BACKGROUNDPLOT", 0);
                 
@@ -51,17 +51,14 @@ namespace PlotWizard
                                                      "acad.ctb",
                                                      Ribbon.LayoutSettings.PlotterType,
                                                      plotObject);
-
                     if (!lay.IsNull)
                     {
                         Layouts.Add(lay);
-                        PureLayouts.Add(lay);
                     }
                 }
-                
                 doc.Editor.WriteMessage($"Создано {plotObjects.Count.ToString()} листа(-ов).\n");
             }
-            doc.Editor.Regen();
+            //doc.Editor.Regen();
         }
         public static void MultiPlot()
         {
@@ -96,12 +93,10 @@ namespace PlotWizard
                 }
                 ObjectIdCollection AllLayouts = Layouts;
 
-
                 MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.PageSize.Value,
                                                  Ribbon.LayoutSettings.PlotterType,
                                                  saveFileDialog.FileName,
-                                                 AllLayouts,
-                                                 PureLayouts);
+                                                 AllLayouts);
             }
             catch (Exception e)
             {
@@ -111,34 +106,45 @@ namespace PlotWizard
         public static void EraseAllLayouts()
         {
             LayoutCommands.EraseAllLayouts();
-            PureLayouts.Clear();
+            Layouts.Clear();
         }
         private static string GetInitialFilename(ObjectIdCollection layouts)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
-            Transaction tr = db.TransactionManager.StartTransaction();
-            
-            string filename;
-            if (layouts != null && !layouts.IsDisposed && layouts.Count > 0)
+            string filename = "";
+            using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                try
+                if (layouts != null && !layouts.IsDisposed && layouts.Count > 0)
                 {
-                    Layout layout = tr.GetObject(layouts[0], OpenMode.ForRead) as Layout;
-                    filename = layout.LayoutName;
+                    try
+                    {
+                        var obj = layouts[layouts.Count-1];
+                        if (db.TryGetObjectId(obj.Handle, out obj))
+                        {
+                            Layout layout = tr.GetObject(obj, OpenMode.ForRead) as Layout;
+                            if (String.IsNullOrEmpty(layout.LayoutName))
+                            {
+                                throw new Exception();
+                            }
+                            filename = layout.LayoutName;
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nУказанная страница отсуствует в БД чертежа.");
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nУказанная страница отсуствует в БД чертежа.");
-                    return "";
+                    System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nНет страниц для печати.");
                 }
+                tr.Commit();
             }
-            else
-            {
-                System.Windows.MessageBox.Show("Невозможно сформировать имя файла для печати по умолчанию\nНет страниц для печати.");
-                return "";
-            }
-            tr.Commit();
             return filename;
         }
         private static List<PlotObject> GetPlotObjects(string targetBlockName,

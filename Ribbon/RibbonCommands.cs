@@ -57,7 +57,6 @@ namespace PlotWizard.Ribbon
             }
             
             Wizard.Layouts = new ObjectIdCollection(); // stores the newly-created layouts
-            Wizard.PureLayouts = new ObjectIdCollection();
 
             RibbonLabel labelBlockName = new RibbonLabel
             {
@@ -157,7 +156,7 @@ namespace PlotWizard.Ribbon
             btnEraseLayouts = new Autodesk.Windows.RibbonButton
             {
                 CommandHandler = new Ribbon.CommandHandlers.ButtonEraseLayoutsCommandHandler(),
-                Text = "Удалить\nлисты",
+                Text = "Очистить",
                 ShowText = true,
                 LargeImage = Extensions.GetBitmap(Properties.Resources.icon_16),
                 Size = RibbonItemSize.Large,
