@@ -18,7 +18,16 @@ namespace PlotWizard.Ribbon
             FillPlotterComboBox();
             FillPageSizeComboBox(comboBoxPlotterType.SelectedItem.ToString());
             FillNumericalUpDown();
+            FillCheckBox();
         }
+        private void FillCheckBox()
+        {
+            if (LayoutSettings.AutoOpenFile == null)
+                checkBoxAutoOpenFile.Checked = LayoutSettings.defaultAutoOpenFile;
+            else
+                checkBoxAutoOpenFile.Checked = (bool)LayoutSettings.AutoOpenFile;
+        }
+
         private void FillNumericalUpDown()
         {
             numericUpDownContentScaling.Value = LayoutSettings.ContentScaling == -1 ? (decimal)LayoutSettings.defaultContentScaling : (decimal)LayoutSettings.ContentScaling;
@@ -68,6 +77,7 @@ namespace PlotWizard.Ribbon
             LayoutSettings.PlotterType = comboBoxPlotterType.SelectedItem.ToString();
             LayoutSettings.ContentScaling = (double)numericUpDownContentScaling.Value;
             LayoutSettings.ViewportScaling = (double)numericUpDownViewportScaling.Value;
+            LayoutSettings.AutoOpenFile = checkBoxAutoOpenFile.Checked;
             this.Close();
         }
         private void buttonCancel_Click(object sender, EventArgs e)

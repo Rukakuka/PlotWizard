@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -13,7 +14,7 @@ namespace PlotWizard
             Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null || doc.IsDisposed)
             {
-                System.Windows.MessageBox.Show("Document is null");
+                System.Windows.MessageBox.Show("Чертеж отсуствует или загружен с ошибкой. Отмена.");
                 return;
             }
             Editor ed = doc.Editor;
@@ -21,15 +22,14 @@ namespace PlotWizard
             Database db = doc.Database;
             if (db == null || db.IsDisposed)
             {
-                System.Windows.MessageBox.Show("Database is null");
+                System.Windows.MessageBox.Show("База данных чертежа отсуствует или загружена с ошибкой. Отмена.");
                 return;
             }
-
             using (Transaction tr = db.TransactionManager.StartTransaction())// <--- TODO fix NullReferenceException 
             {
                 if (tr == null || tr.IsDisposed)
                 {
-                    System.Windows.MessageBox.Show("Transaction is null");
+                    System.Windows.MessageBox.Show("Транзакция отсутствует или загружена с ошибкой. Отмена.");
                     return;
                 }
                 PlotInfo plotInfo = new PlotInfo();
@@ -99,7 +99,9 @@ namespace PlotWizard
                     }
 
                     ed.WriteMessage($"\nИтого листов к печати: {sheetCount.ToString()}, всего: {allLayouts.Count}, листов создано: {layoutsToPlot.Count}.\n");
-                    
+
+                    bool printingError = false;
+
                     using (PlotProgressDialog plotProcessDialog = new PlotProgressDialog(false, sheetCount, true))
                     {
                         int numSheet = 1;
@@ -124,7 +126,7 @@ namespace PlotWizard
                                 plotInfo.Layout = btrId;
 
                                 LayoutManager.Current.CurrentLayout = layout.LayoutName;
-
+                                
                                 plotInfo.OverrideSettings = plotSettings;
                                 plotInfoValidator.Validate(plotInfo);
                                 if (numSheet == 1)
@@ -138,11 +140,28 @@ namespace PlotWizard
                                     plotProcessDialog.UpperPlotProgressRange = 100;
                                     plotProcessDialog.PlotProgressPos = 0;
 
+                                    var file = new FileInfo(outputFileName);
+                                    if (file.Exists)
+                                    {
+                                        try
+                                        {
+                                            file.Delete();
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            System.Windows.MessageBox.Show("Файл для печати занят другим процессом. Отмена.");
+                                            ed.WriteMessage($"\nОшибка открытия файла для печати. Отмена.\n");
+                                            printingError = true;
+                                            break;
+                                        }
+                                    }
+
                                     plotProcessDialog.OnBeginPlot();
                                     plotProcessDialog.IsVisible = true;
                                     plotEngine.BeginPlot(plotProcessDialog, null);
 
                                     plotEngine.BeginDocument(plotInfo, doc.Name, null, 1, true, outputFileName);
+
                                 }
 
                                 plotProcessDialog.StatusMsgString = "Plotting " + 
@@ -157,8 +176,8 @@ namespace PlotWizard
                                 plotProcessDialog.SheetProgressPos = 0;
 
                                 PlotPageInfo plotPageInfo = new PlotPageInfo();
-                                plotEngine.BeginPage(plotPageInfo, plotInfo, (numSheet == layoutsToPlot.Count), null);
 
+                                plotEngine.BeginPage(plotPageInfo, plotInfo, (numSheet == layoutsToPlot.Count), null);
                                 plotEngine.BeginGenerateGraphics(null);
                                 plotProcessDialog.SheetProgressPos = 50;
                                 plotEngine.EndGenerateGraphics(null);
@@ -166,19 +185,22 @@ namespace PlotWizard
                                 plotProcessDialog.SheetProgressPos = 100;
                                 plotProcessDialog.OnEndSheet();
                                 numSheet++;
-
                                 plotProcessDialog.PlotProgressPos = (int)Math.Floor((double)numSheet * 100 / layoutsToPlot.Count);
                             }
-                            plotEngine.EndDocument(null);
 
-                            plotProcessDialog.PlotProgressPos = 100;
-                            plotProcessDialog.OnEndPlot();
-                            plotEngine.EndPlot(null);
+                            if (!printingError)
+                            {
+                                plotEngine.EndDocument(null);
+                                plotProcessDialog.PlotProgressPos = 100;
+                                plotProcessDialog.OnEndPlot();
+                                plotEngine.EndPlot(null);
+                            }
                             ed.WriteMessage($"\nПечать завершена. \n");
-                            
+
                             tr.Commit();
                             
-                            System.Diagnostics.Process.Start(outputFileName);
+                            if ((bool)Ribbon.LayoutSettings.AutoOpenFile && !printingError)
+                                System.Diagnostics.Process.Start(outputFileName);
                         }
                     }
                 }

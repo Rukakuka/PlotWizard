@@ -38,6 +38,7 @@
             this.numericUpDownContentScaling = new System.Windows.Forms.NumericUpDown();
             this.buttonOk = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
+            this.checkBoxAutoOpenFile = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownViewportScaling)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownContentScaling)).BeginInit();
             this.SuspendLayout();
@@ -132,7 +133,7 @@
             // 
             // buttonOk
             // 
-            this.buttonOk.Location = new System.Drawing.Point(329, 126);
+            this.buttonOk.Location = new System.Drawing.Point(329, 196);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 9;
@@ -143,7 +144,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(248, 126);
+            this.buttonCancel.Location = new System.Drawing.Point(248, 196);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 10;
@@ -151,13 +152,24 @@
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
+            // checkBoxAutoOpenFile
+            // 
+            this.checkBoxAutoOpenFile.AutoSize = true;
+            this.checkBoxAutoOpenFile.Location = new System.Drawing.Point(15, 121);
+            this.checkBoxAutoOpenFile.Name = "checkBoxAutoOpenFile";
+            this.checkBoxAutoOpenFile.Size = new System.Drawing.Size(326, 17);
+            this.checkBoxAutoOpenFile.TabIndex = 11;
+            this.checkBoxAutoOpenFile.Text = "Открывать файл автоматически после завершения печати";
+            this.checkBoxAutoOpenFile.UseVisualStyleBackColor = true;
+            // 
             // LayoutSettingsWindow
             // 
             this.AcceptButton = this.buttonOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(421, 161);
+            this.ClientSize = new System.Drawing.Size(421, 235);
+            this.Controls.Add(this.checkBoxAutoOpenFile);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.numericUpDownContentScaling);
@@ -189,5 +201,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownContentScaling;
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.Button buttonCancel;
+        private System.Windows.Forms.CheckBox checkBoxAutoOpenFile;
     }
 }
