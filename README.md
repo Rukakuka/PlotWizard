@@ -5,4 +5,4 @@ As you may know, there are two ways to print something from AutoCAD - take a Pri
 
 But what if there are many simular objects in modelspace without configured print options? Printing each of them is too much routine, so the pligin comes to help. Just take an example of object (block reference) and plugin creates layouts for them, and then, if needed, prints them in order of positions.
 
-![Bar](https://github.com/Rukakuka/PlotWizard/blob/master/img/bar.png)
+![Demonstration](https://github.com/Rukakuka/PlotWizard/blob/master/img/plotwizard_gif_1.gif)
