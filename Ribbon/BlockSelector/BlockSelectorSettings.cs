@@ -4,9 +4,9 @@ namespace PlotWizard.Ribbon
 {
     class BlockSelectorSettings
     {
-        public static string defaultPrefix { get; set; } = "";
-        public static string defaultPostfix { get; set; } = "";
-        public static SortingOrder defaultSortingOrder { get; set; } = new SortingOrder(1, 1, false);
+        public const string defaultPrefix = "";
+        public const string defaultPostfix = "";
+        public static SortingOrder defaultSortingOrder { get; } = new SortingOrder(1, 1, false);
         public static string Prefix { get; set; } = null;
         public static string Postfix { get; set; } = null;
         public static SortingOrder SortingOrder { get; set; } = defaultSortingOrder;
