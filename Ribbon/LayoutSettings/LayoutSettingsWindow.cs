@@ -78,6 +78,8 @@ namespace PlotWizard.Ribbon
             LayoutSettings.ContentScaling = (double)numericUpDownContentScaling.Value;
             LayoutSettings.ViewportScaling = (double)numericUpDownViewportScaling.Value;
             LayoutSettings.AutoOpenFile = checkBoxAutoOpenFile.Checked;
+            LayoutSettings.SaveConfig(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\" + LayoutSettings.configFileName);
+
             this.Close();
         }
         private void buttonCancel_Click(object sender, EventArgs e)
