@@ -22,16 +22,16 @@ namespace PlotWizard.Ribbon
         }
         private void FillCheckBox()
         {
-            if (LayoutSettings.AutoOpenFile == null)
-                checkBoxAutoOpenFile.Checked = LayoutSettings.defaultAutoOpenFile;
+            if (LayoutSettings.Current.AutoOpenFile == null)
+                checkBoxAutoOpenFile.Checked = LayoutSettings.Default.AutoOpenFile;
             else
-                checkBoxAutoOpenFile.Checked = (bool)LayoutSettings.AutoOpenFile;
+                checkBoxAutoOpenFile.Checked = (bool)LayoutSettings.Current.AutoOpenFile;
         }
 
         private void FillNumericalUpDown()
         {
-            numericUpDownContentScaling.Value = LayoutSettings.ContentScaling == -1 ? (decimal)LayoutSettings.defaultContentScaling : (decimal)LayoutSettings.ContentScaling;
-            numericUpDownViewportScaling.Value = LayoutSettings.ViewportScaling == -1 ? (decimal)LayoutSettings.defaultViewportScaling : (decimal)LayoutSettings.ViewportScaling;
+            numericUpDownContentScaling.Value = LayoutSettings.Current.ContentScaling == -1 ? (decimal)LayoutSettings.Default.ContentScaling : (decimal)LayoutSettings.Current.ContentScaling;
+            numericUpDownViewportScaling.Value = LayoutSettings.Current.ViewportScaling == -1 ? (decimal)LayoutSettings.Default.ViewportScaling : (decimal)LayoutSettings.Current.ViewportScaling;
         }
         private void FillPlotterComboBox()
         {
@@ -39,9 +39,9 @@ namespace PlotWizard.Ribbon
             {
                 this.comboBoxPlotterType.Items.Add(plotter);
 
-                if (String.IsNullOrEmpty(LayoutSettings.PlotterType) && plotter.Equals(LayoutSettings.defaultPlotterType))
-                    comboBoxPlotterType.SelectedItem = LayoutSettings.defaultPlotterType;
-                else if (plotter.Equals(LayoutSettings.PlotterType))
+                if (String.IsNullOrEmpty(LayoutSettings.Current.PlotterType) && plotter.Equals(LayoutSettings.Default.PlotterType))
+                    comboBoxPlotterType.SelectedItem = LayoutSettings.Default.PlotterType;
+                else if (plotter.Equals(LayoutSettings.Current.PlotterType))
                         comboBoxPlotterType.SelectedItem = plotter;
             }
             this.comboBoxPlotterType.SelectedIndexChanged += new EventHandler(this.comboBoxPlotterType_SelectedIndexChanged);
@@ -62,9 +62,9 @@ namespace PlotWizard.Ribbon
             foreach (KeyValuePair<string, string> pageSize in media)
             {
                 this.comboBoxPageSize.Items.Add(pageSize.Key);
-                if (((String.IsNullOrEmpty(LayoutSettings.PageSize.Value) || String.IsNullOrWhiteSpace(LayoutSettings.PageSize.Value))
-                    && pageSize.Value.Equals(LayoutSettings.defaultPageSize.Value))
-                    || pageSize.Value.Equals(LayoutSettings.PageSize.Value))
+                if (((String.IsNullOrEmpty(LayoutSettings.Current.PageSize.Value) || String.IsNullOrWhiteSpace(LayoutSettings.Current.PageSize.Value))
+                    && pageSize.Value.Equals(LayoutSettings.Default.PageSize.Value))
+                    || pageSize.Value.Equals(LayoutSettings.Current.PageSize.Value))
                 {
                     comboBoxPageSize.SelectedItem = pageSize.Key;
                 }
@@ -73,11 +73,11 @@ namespace PlotWizard.Ribbon
         private void buttonOk_Click(object sender, EventArgs e)
         {
             // applying changed settings
-            LayoutSettings.PageSize = new KeyValuePair<string, string>(comboBoxPageSize.SelectedItem.ToString(), Extensions.GetMediaNameList(comboBoxPlotterType.SelectedItem.ToString())[comboBoxPageSize.SelectedItem.ToString()]);
-            LayoutSettings.PlotterType = comboBoxPlotterType.SelectedItem.ToString();
-            LayoutSettings.ContentScaling = (double)numericUpDownContentScaling.Value;
-            LayoutSettings.ViewportScaling = (double)numericUpDownViewportScaling.Value;
-            LayoutSettings.AutoOpenFile = checkBoxAutoOpenFile.Checked;
+            LayoutSettings.Current.PageSize = new KeyValuePair<string, string>(comboBoxPageSize.SelectedItem.ToString(), Extensions.GetMediaNameList(comboBoxPlotterType.SelectedItem.ToString())[comboBoxPageSize.SelectedItem.ToString()]);
+            LayoutSettings.Current.PlotterType = comboBoxPlotterType.SelectedItem.ToString();
+            LayoutSettings.Current.ContentScaling = (double)numericUpDownContentScaling.Value;
+            LayoutSettings.Current.ViewportScaling = (double)numericUpDownViewportScaling.Value;
+            LayoutSettings.Current.AutoOpenFile = checkBoxAutoOpenFile.Checked;
             LayoutSettings.SaveConfig(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\" + LayoutSettings.configFileName);
 
             this.Close();

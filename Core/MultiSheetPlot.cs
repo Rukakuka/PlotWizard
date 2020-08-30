@@ -199,7 +199,7 @@ namespace PlotWizard
 
                             tr.Commit();
                             
-                            if ((bool)Ribbon.LayoutSettings.AutoOpenFile && !printingError)
+                            if ((bool)Ribbon.LayoutSettings.Current.AutoOpenFile && !printingError)
                                 System.Diagnostics.Process.Start(outputFileName);
                         }
                     }

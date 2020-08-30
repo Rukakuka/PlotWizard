@@ -45,11 +45,11 @@ namespace PlotWizard
                 
                 foreach (var plotObject in plotObjects)
                 {
-                    ObjectId lay = lc.CreateMyLayout(Ribbon.LayoutSettings.PageSize.Value,
-                                                     Ribbon.LayoutSettings.ViewportScaling,
-                                                     Ribbon.LayoutSettings.ContentScaling,
+                    ObjectId lay = lc.CreateMyLayout(Ribbon.LayoutSettings.Current.PageSize.Value,
+                                                     Ribbon.LayoutSettings.Current.ViewportScaling,
+                                                     Ribbon.LayoutSettings.Current.ContentScaling,
                                                      "acad.ctb",
-                                                     Ribbon.LayoutSettings.PlotterType,
+                                                     Ribbon.LayoutSettings.Current.PlotterType,
                                                      plotObject);
                     if (!lay.IsNull)
                     {
@@ -74,7 +74,7 @@ namespace PlotWizard
                     return;
                 }
 
-                Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Ribbon.LayoutSettings.PlotterType);
+                Autodesk.AutoCAD.PlottingServices.PlotConfigManager.SetCurrentConfig(Ribbon.LayoutSettings.Current.PlotterType);
 
                 Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
@@ -93,8 +93,8 @@ namespace PlotWizard
                 }
                 ObjectIdCollection AllLayouts = Layouts;
 
-                MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.PageSize.Value,
-                                                 Ribbon.LayoutSettings.PlotterType,
+                MultiSheetPlot.MultiSheetPlotter(Ribbon.LayoutSettings.Current.PageSize.Value,
+                                                 Ribbon.LayoutSettings.Current.PlotterType,
                                                  saveFileDialog.FileName,
                                                  AllLayouts);
             }
